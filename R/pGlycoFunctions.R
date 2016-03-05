@@ -91,10 +91,13 @@ Read.IDPdb <- function (IDPdb, ChainSaw,dir) {
         
 
         IDPdb <- IDPdb[, -c(2:6)]
-        IDPdb <- IDPdb[-c(1,2),]
+       IDPdb <- IDPdb[-c(1,2),]
+       
+      # x <-  data.frame (IDPdb$Group.Source.Spectrum, IDPdb$Sequence)
+     #  IDPdb <- IDPdb[!duplicated(x),]
         
-        
-        IDPdb$ppm.mass.error <- (IDPdb$Mass.Error/IDPdb$Exact.Mass *10^6)     
+        ppm.mass.error <- IDPdb$Mass.Error/IDPdb$Exact.Mass *10^6
+        IDPdb$ppm.mass.error <- ppm.mass.error     
         
         
         # change: factor 0.1.4586  to: numeric 4586 
@@ -135,13 +138,31 @@ Read.IDPdb <- function (IDPdb, ChainSaw,dir) {
         table2Sequence <- IDPdb$Sequence        
         table2Sequence <- gsub( "C[57]", "C", table2Sequence ,fixed=TRUE)
         table2Sequence <- gsub( "M[16]", "$",  table2Sequence ,fixed=TRUE)
+        
+        table2Sequence <- gsub( "K[57]", "@",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub( "H[57]", "#",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub( "D[57]", "%",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub( "E[57]", "^",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub( "S[57]", "&",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub( "T[57]", "*",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub( "Y[57]", "(",  table2Sequence ,fixed=TRUE)
+        
+        
         table2Sequence <- gsub(pattern="[0123456789]", replacement="", table2Sequence)
         table2Sequence <- gsub(pattern="[]", replacement="", table2Sequence, 
                                fixed = TRUE)
         
         table2Sequence <- gsub(  "$", "M16",  table2Sequence ,fixed=TRUE)
-        IDPdb$table2Sequence <- table2Sequence
         
+        table2Sequence <- gsub(  "@", "K57",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub(  "#", "H57",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub(  "%", "D57",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub(  "^", "E57",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub(  "&", "S57",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub(  "*", "T57",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub(  "(", "Y57",  table2Sequence ,fixed=TRUE)
+        
+        IDPdb$table2Sequence <- table2Sequence
        
         # change: chr "QHGFTMM[16]NVYN[1170]STK" to: chr "0000000200010000"
         modification <- IDPdb$Sequence
@@ -149,7 +170,15 @@ Read.IDPdb <- function (IDPdb, ChainSaw,dir) {
                             modification, fixed=FALSE)
         modification <- gsub( "C[00]", "C", modification ,fixed=TRUE)
         modification <- gsub( "M[00]", "2",  modification ,fixed=TRUE)
-       
+        
+        modification <- gsub( "K[00]", "3",  modification ,fixed=TRUE)
+        modification <- gsub( "H[00]", "4",  modification ,fixed=TRUE)
+        modification <- gsub( "D[00]", "5",  modification ,fixed=TRUE)
+        modification <- gsub( "E[00]", "6",  modification ,fixed=TRUE)
+        modification <- gsub( "S[00]", "7",  modification ,fixed=TRUE)
+        modification <- gsub( "T[00]", "8",  modification ,fixed=TRUE)
+        modification <- gsub( "Y[00]", "9",  modification ,fixed=TRUE)
+        
         modification<- gsub( "N[000]", "1",  modification,fixed=TRUE)
         modification<- gsub( "N[0000]", "1",  modification,fixed=TRUE)
         modification <- gsub( "[A-Z]", "0", modification)
@@ -172,6 +201,15 @@ Read.IDPdb <- function (IDPdb, ChainSaw,dir) {
         GlycanMass <- gsub( "C[57]", "C", GlycanMass ,fixed=TRUE)
         
         GlycanMass <- gsub( "M[16]", "M",  GlycanMass ,fixed=TRUE)
+        
+        GlycanMass <- gsub( "K[57]", "K",  GlycanMass ,fixed=TRUE)
+        GlycanMass <- gsub( "H[57]", "H",  GlycanMass ,fixed=TRUE)
+        GlycanMass <- gsub( "D[57]", "D",  GlycanMass ,fixed=TRUE)
+        GlycanMass <- gsub( "E[57]", "E",  GlycanMass ,fixed=TRUE)
+        GlycanMass <- gsub( "S[57]", "S",  GlycanMass ,fixed=TRUE)
+        GlycanMass <- gsub( "T[57]", "T",  GlycanMass ,fixed=TRUE)
+        GlycanMass <- gsub( "Y[57]", "Y",  GlycanMass ,fixed=TRUE)
+        
         
         GlycanMass <- gsub( "[A-Z]", "", GlycanMass)
         
@@ -198,12 +236,26 @@ Read.IDPdb <- function (IDPdb, ChainSaw,dir) {
         modMass <- IDPdb$Sequence
         modMass <- gsub( "C[57]", "C", modMass ,fixed=TRUE)
         modMass <- gsub( "M[16]", "m",  modMass ,fixed=TRUE)
+        modMass <- gsub( "K[57]", "k",  modMass ,fixed=TRUE)
+        modMass <- gsub( "H[57]", "h",  modMass ,fixed=TRUE)
+        modMass <- gsub( "D[57]", "d",  modMass ,fixed=TRUE)
+        modMass <- gsub( "E[57]", "e",  modMass ,fixed=TRUE)
+        modMass <- gsub( "S[57]", "s",  modMass ,fixed=TRUE)
+        modMass <- gsub( "T[57]", "t",  modMass ,fixed=TRUE)
+        modMass <- gsub( "Y[57]", "y",  modMass ,fixed=TRUE)
         modMass <- gsub(pattern="[0123456789]", replacement="0", modMass )
         modMass <- gsub( "N[000]", "n",  modMass ,fixed=TRUE)
         modMass <- gsub( "N[0000]", "n",  modMass ,fixed=TRUE)
         modMass <- gsub( "[A-Z]", "0", modMass)
         modMass <- strsplit(modMass , split="")
         modMass <- lapply(modMass, function(x){gsub("m", "15.994915", x)})
+        modMass <- lapply(modMass, function(x){gsub("k", "57.021464", x)})
+        modMass <- lapply(modMass, function(x){gsub("h", "57.021464", x)})
+        modMass <- lapply(modMass, function(x){gsub("d", "57.021464", x)})
+        modMass <- lapply(modMass, function(x){gsub("e", "57.021464", x)})
+        modMass <- lapply(modMass, function(x){gsub("s", "57.021464", x)})
+        modMass <- lapply(modMass, function(x){gsub("t", "57.021464", x)})
+        modMass <- lapply(modMass, function(x){gsub("y", "57.021464", x)})
         modMass <- lapply(modMass, function(x){gsub("n", "0", x)})
         modMass <- lapply(modMass, function(x){as.numeric(x)})
         modMass <- sapply(modMass, function(x) {sum(x)})
@@ -213,6 +265,13 @@ Read.IDPdb <- function (IDPdb, ChainSaw,dir) {
         glycoModMass <- IDPdb$Sequence
         glycoModMass <- gsub( "C[57]", "0", glycoModMass ,fixed=TRUE)
         glycoModMass <- gsub( "M[16]", "0",  glycoModMass ,fixed=TRUE)
+        glycoModMass <- gsub( "K[57]", "0",  glycoModMass ,fixed=TRUE)
+        glycoModMass <- gsub( "H[57]", "0",  glycoModMass ,fixed=TRUE)
+        glycoModMass <- gsub( "D[57]", "0",  glycoModMass ,fixed=TRUE)
+        glycoModMass <- gsub( "E[57]", "0",  glycoModMass ,fixed=TRUE)
+        glycoModMass <- gsub( "S[57]", "0",  glycoModMass ,fixed=TRUE)
+        glycoModMass <- gsub( "T[57]", "0",  glycoModMass ,fixed=TRUE)
+        glycoModMass <- gsub( "Y[57]", "0",  glycoModMass ,fixed=TRUE)
         glycoModMass <- gsub(pattern="[0123456789]", replacement="0", 
                              glycoModMass )
         glycoModMass <- gsub( "N[000]", "n",  glycoModMass ,fixed=TRUE)
@@ -269,7 +328,7 @@ read.dat <- function(file="ljz_20131022_MR_Chym2_ELUTE.mzML.binary.sn1801.txt")
 }
 
 ###############################################################################
-#  3. Calculate the Y1, Y0, X1, and X0 masses and save each to a list
+#  3. Calculate the Y1, Y0, Y2, and Y3 masses and save each to a list
 # These ions are specific to a particular glycopeptide and are key to 
 # validating the gPSMs.
 ##############################################################################
@@ -284,18 +343,40 @@ calculateIons <- function (IDPdb) {
                 
                 ii = ii +1 
 
-        
+Ions[[ii]]$PepPlus <- 
+        find_PepPlus(MonoisotopicPeptideMass=IDPdb$MonoisotopicPeptideMass[i],charge=1:IDPdb$charge[i])   
+
+Ions[[ii]]$Y0NH3 <- 
+        find_Y0NH3(MonoisotopicPeptideMass=IDPdb$MonoisotopicPeptideMass[i],charge=1:IDPdb$charge[i]) 
         
 Ions[[ii]]$Y1 <- 
         find_Y1(MonoisotopicY1mass=IDPdb$MonoisotopicY1mass[i],charge=1:IDPdb$charge[i])
 
+Ions[[ii]]$Y1Mox <- 
+        find_Y1Mox(MonoisotopicY1mass=IDPdb$MonoisotopicY1mass[i],charge=1:IDPdb$charge[i])
 
-Ions[[ii]]$PepPlus <- 
-        find_PepPlus(MonoisotopicPeptideMass=IDPdb$MonoisotopicPeptideMass[i],charge=1:IDPdb$charge[i])
+Ions[[ii]]$Y1Ca <- 
+        find_Y1Ca(MonoisotopicY1mass=IDPdb$MonoisotopicY1mass[i],charge=1:IDPdb$charge[i])
 
+Ions[[ii]]$Y1F <- 
+        find_Y1F(MonoisotopicY1mass=IDPdb$MonoisotopicY1mass[i],charge=1:IDPdb$charge[i])
 
-Ions[[ii]]$F1 <- 
-        find_F1(MonoisotopicY1mass=IDPdb$MonoisotopicY1mass[i],charge=1:IDPdb$charge[i])
+Ions[[ii]]$Y2F <- 
+        find_Y2F(MonoisotopicY1mass=IDPdb$MonoisotopicY1mass[i],charge=1:IDPdb$charge[i])
+
+Ions[[ii]]$Y2 <- 
+        find_Y2(MonoisotopicY1mass=IDPdb$MonoisotopicY1mass[i],charge=1:IDPdb$charge[i])
+
+Ions[[ii]]$Y3 <- 
+        find_Y3(MonoisotopicY1mass=IDPdb$MonoisotopicY1mass[i],charge=1:IDPdb$charge[i])
+
+Ions[[ii]]$Y3X <- 
+        find_Y3X(MonoisotopicY1mass=IDPdb$MonoisotopicY1mass[i],charge=1:IDPdb$charge[i])
+Ions[[ii]]$Y3F <- 
+        find_Y3F(MonoisotopicY1mass=IDPdb$MonoisotopicY1mass[i],charge=1:IDPdb$charge[i])
+Ions[[ii]]$Y3FX <- 
+        find_Y3FX(MonoisotopicY1mass=IDPdb$MonoisotopicY1mass[i],charge=1:IDPdb$charge[i])
+
 }
 
 
@@ -318,6 +399,34 @@ find_Y1 <- function(MonoisotopicY1mass, charge ) {
 }
 
 #########################################
+#        Function 7. Calculate the Y1Mox masses, ie the mass if lost methane sulfenic acid
+#########################################
+
+
+find_Y1Mox <- function(MonoisotopicY1mass, charge ) {
+        
+        Y1Mox <- (((MonoisotopicY1mass-64.10686) + ( charge * 1.007276 ) ) 
+                / charge)
+        
+        return(Y1Mox)
+        
+}
+#########################################
+#        Function 7. Calculate the Y1Ca masses, ie the mass if lost carbamidomethyl
+#########################################
+
+
+find_Y1Ca <- function(MonoisotopicY1mass, charge ) {
+        
+        Y1Ca <- (((MonoisotopicY1mass-57.021464) + ( charge * 1.007276 ) ) 
+                  / charge)
+        
+        return(Y1Ca)
+        
+}
+
+
+#########################################
 #        Function 8. Calculate the Peptide masses 
 #########################################
 
@@ -331,26 +440,125 @@ find_PepPlus <- function(MonoisotopicPeptideMass, charge ) {
         
 }
 
-
 #########################################
-#        Function 7. Calculate the F1 masses, ie the mass if core fucose present
+#        Function 8. Calculate the Peptide masses with loss of ammonia
 #########################################
 
-# identify the X1 (MonoisotopicX1mass) peak.
+# identify the Peptide masses (of glycopeptides that lost the whole glycan)
 
-find_F1 <- function(MonoisotopicY1mass, charge ) {
+find_Y0NH3 <- function(MonoisotopicPeptideMass, charge ) {
         
-        F1 <- (((MonoisotopicY1mass+146.057909) + ( charge * 1.007276 ) ) 
-               / charge)
+        Y0NH3 <- (((MonoisotopicPeptideMass- 17.026549) + ( charge * 1.007276 ) ) 
+                  / charge)
         
-        return(F1)
+        return(Y0NH3)
         
 }
+
+#########################################
+#        Function 7. Calculate the Y1F masses, ie the mass if core fucose present
+#########################################
+
+
+find_Y1F <- function(MonoisotopicY1mass, charge ) {
+        
+        Y1F <- (((MonoisotopicY1mass+146.057909) + ( charge * 1.007276 ) ) 
+               / charge)
+        
+        return(Y1F)
+        
+}
+
+#########################################
+#        Function 7. Calculate the Y1F masses, ie the mass if core fucose present
+#########################################
+
+
+find_Y2F <- function(MonoisotopicY1mass, charge ) {
+        
+        Y2F <- (((MonoisotopicY1mass+146.057909+203.079373) + ( charge * 1.007276 ) ) 
+                / charge)
+        
+        return(Y2F)
+        
+}
+
+#########################################
+#        Function 7. Calculate the Y1F masses, ie the mass if core fucose present
+#########################################
+
+
+find_Y3F <- function(MonoisotopicY1mass, charge ) {
+        
+        Y3F <- (((MonoisotopicY1mass+146.057909+203.079373+162.052824) + ( charge * 1.007276 ) ) 
+                / charge)
+        
+        return(Y3F)
+        
+}
+
+#########################################
+#        Function 7. Calculate the Y1F masses, ie the mass if core fucose present
+#########################################
+
+
+find_Y3FX <- function(MonoisotopicY1mass, charge ) {
+        
+        Y3FX <- (((MonoisotopicY1mass+146.057909+203.079373+162.052824+132.042259) + ( charge * 1.007276 ) ) 
+                / charge)
+        
+        return(Y3FX)
+        
+}
+
+
+#########################################
+#        Function 7. Calculate the Y2 masses, ie the mass if core fucose present
+#########################################
+
+
+find_Y2 <- function(MonoisotopicY1mass, charge ) {
+        
+        Y2 <- (((MonoisotopicY1mass+203.079373 ) + ( charge * 1.007276 ) ) 
+                / charge)
+        
+        return(Y2)
+        
+}
+
+#########################################
+#        Function 7. Calculate the Y3 masses, ie the mass if core fucose present
+#########################################
+
+
+find_Y3 <- function(MonoisotopicY1mass, charge ) {
+        
+        Y3 <- (((MonoisotopicY1mass+ 203.079373 + 162.052824  ) + ( charge * 1.007276 ) ) 
+               / charge)
+        
+        return(Y3)
+        
+}
+
+#########################################
+#        Function 7. Calculate the Y3X masses, ie the mass if core xylose present
+#########################################
+
+
+find_Y3X <- function(MonoisotopicY1mass, charge ) {
+        
+        Y3X <- (((MonoisotopicY1mass+ 203.079373 + 162.052824 +  132.042259 ) + ( charge * 1.007276 ) ) 
+               / charge)
+        
+        return(Y3X)
+        
+}
+
 ###############################################################################
 #  3. Compile all of the data into one list
 ##############################################################################
 
-compileData <- function (analysis="massRecon", sampleName="results", 
+compileData <- function (analysis="analysis", sampleName="results", 
                          IDPdb=IDPdb, MS2Data=MS2Data, Ions=Ions) {
         
         data <- vector( mode="list", length=nrow(IDPdb))
@@ -383,15 +591,25 @@ compileData <- function (analysis="massRecon", sampleName="results",
                                      
                                      modification=IDPdb$modification[i],
                                      GlycanMass=IDPdb$GlycanMass[i], 
-                                     
+                                     glycoform.mass=IDPdb$glycoform.mass[i],
+                                     structure=IDPdb$structure[i],
                                      mZ=MS2Data[[i]]$mZ, 
                                      intensity=MS2Data[[i]]$intensity, 
                                      
                                      MonoisotopicY1mass=IDPdb$MonoisotopicY1mass[i], 
                                      MonoisotopicPeptideMass=IDPdb$MonoisotopicPeptideMass[i],
+                                     PepPlus=Ions[[i]]$PepPlus,
+                                     Y0NH3=Ions[[i]]$Y0NH3, 
                                      Y1=Ions[[i]]$Y1, 
-                                     F1=Ions[[i]]$F1, 
-                                     PepPlus=Ions[[i]]$PepPlus
+                                     Y1Mox=Ions[[i]]$Y1Mox,
+                                     Y1Ca=Ions[[i]]$Y1Ca,
+                                     Y1F=Ions[[i]]$Y1F, 
+                                     Y2F=Ions[[i]]$Y2F,
+                                     Y3F=Ions[[i]]$Y3F,
+                                     Y2=Ions[[i]]$Y2,
+                                     Y3=Ions[[i]]$Y3,
+                                     Y3X=Ions[[i]]$Y3X,
+                                     Y3FX=Ions[[i]]$Y3FX
                 ))
                 
         }
@@ -411,7 +629,7 @@ gPSMvalidator <-
         
         function (data, modification, modificationName, mZmarkerIons, 
                   minNumberIons = 2, itol_ppm = 10, minMarkerIntensityRatio = 2, 
-                  PEAKPLOT=TRUE) 
+                  PEAKPLOT=TRUE, validate=FALSE) 
         {
                 
                 query.idx <- 1:length(data)
@@ -449,35 +667,96 @@ gPSMvalidator <-
         idY1.ppm.error <- (data[[i]]$Y1[c]-data[[i]]$mZ[idY1][c])/data[[i]]$Y1[c]*1e06
         idY1.mZ <- data[[i]]$mZ[idY1][c]
         
-        idX1 <- findNN(data[[i]]$X1 , data[[i]]$mZ)
-        ppm.errorX1 <- 1e-06 * 20 * data[[i]]$mZ[idX1]
-        dd <- (abs(data[[i]]$X1  - data[[i]]$mZ[idX1]) < ppm.errorX1)
-        sum.mZX1Ions.intensity <- sum(data[[i]]$intensity[idX1[dd]])
-        sum.intensity <- sum(data[[i]]$intensity) - sum.mZX1Ions.intensity
-        percent.mZX1Ions <- round(100 *(sum.mZX1Ions.intensity/
-                                (sum.mZX1Ions.intensity +  sum.intensity)), 1)
-        idX1.ppm.error <- (data[[i]]$X1[dd]-data[[i]]$mZ[idX1][dd])/data[[i]]$X1[dd]*1e06
-        idX1.mZ <- data[[i]]$mZ[idX1][dd]
+        idY1Mox <- findNN(data[[i]]$Y1Mox , data[[i]]$mZ)
+        ppm.errorY1Mox <- 1e-06 * 20 * data[[i]]$mZ[idY1Mox]
+        bb <- (abs(data[[i]]$Y1Mox  - data[[i]]$mZ[idY1Mox]) < ppm.errorY1Mox)
+        sum.mZY1MoxIons.intensity <- sum(data[[i]]$intensity[idY1Mox[bb]])
+        sum.intensity <- sum(data[[i]]$intensity) - sum.mZY1MoxIons.intensity
+        percent.mZY1MoxIons <- round(100 *(sum.mZY1MoxIons.intensity/
+                                                   (sum.mZY1MoxIons.intensity +  sum.intensity)), 1)
+        idY1Mox.ppm.error <- (data[[i]]$Y1Mox[bb]-data[[i]]$mZ[idY1Mox][bb])/data[[i]]$Y1Mox[bb]*1e06
+        idY1Mox.mZ <- data[[i]]$mZ[idY1Mox][bb]
         
-        idF1 <- findNN(data[[i]]$F1 , data[[i]]$mZ)
-        ppm.errorF1 <- 1e-06 * 20 * data[[i]]$mZ[idF1]
-        ff <- (abs(data[[i]]$F1  - data[[i]]$mZ[idF1]) < ppm.errorF1)
-        sum.mZF1Ions.intensity <- sum(data[[i]]$intensity[idF1[ff]])
-        sum.intensity <- sum(data[[i]]$intensity) - sum.mZF1Ions.intensity
-        percent.mZF1Ions <- round(100 *(sum.mZF1Ions.intensity/
-                                                (sum.mZF1Ions.intensity +  sum.intensity)), 1)
-        idF1.ppm.error <- (data[[i]]$F1[ff]-data[[i]]$mZ[idF1][ff])/data[[i]]$F1[ff]*1e06
-        idF1.mZ <- data[[i]]$mZ[idF1][ff]
         
-        idX0 <- findNN(data[[i]]$X0 , data[[i]]$mZ)
-        ppm.errorX0 <- 1e-06 * 20 * data[[i]]$mZ[idX0]
-        cc <- (abs(data[[i]]$X0  - data[[i]]$mZ[idX0]) < ppm.errorX0)
-        sum.mZX0Ions.intensity <- sum(data[[i]]$intensity[idX0[cc]])
-        sum.intensity <- sum(data[[i]]$intensity) - sum.mZX0Ions.intensity
-        percent.mZX0Ions <- round(100 *(sum.mZX0Ions.intensity/
-                                (sum.mZX0Ions.intensity +  sum.intensity)), 1)
-        idX0.ppm.error <- (data[[i]]$X0[cc]-data[[i]]$mZ[idX0][cc])/data[[i]]$X0[cc]*1e06
-        idX0.mZ <- data[[i]]$mZ[idX0][cc]
+        idY1Ca <- findNN(data[[i]]$Y1Ca , data[[i]]$mZ)
+        ppm.errorY1Ca <- 1e-06 * 20 * data[[i]]$mZ[idY1Ca]
+        ee <- (abs(data[[i]]$Y1Ca  - data[[i]]$mZ[idY1Ca]) < ppm.errorY1Ca)
+        sum.mZY1CaIons.intensity <- sum(data[[i]]$intensity[idY1Ca[ee]])
+        sum.intensity <- sum(data[[i]]$intensity) - sum.mZY1CaIons.intensity
+        percent.mZY1CaIons <- round(100 *(sum.mZY1CaIons.intensity/
+                                                  (sum.mZY1CaIons.intensity +  sum.intensity)), 1)
+        idY1Ca.ppm.error <- (data[[i]]$Y1Ca[ee]-data[[i]]$mZ[idY1Ca][ee])/data[[i]]$Y1Ca[ee]*1e06
+        idY1Ca.mZ <- data[[i]]$mZ[idY1Ca][ee]
+        
+        idY2 <- findNN(data[[i]]$Y2 , data[[i]]$mZ)
+        ppm.errorY2 <- 1e-06 * 20 * data[[i]]$mZ[idY2]
+        dd <- (abs(data[[i]]$Y2  - data[[i]]$mZ[idY2]) < ppm.errorY2)
+        sum.mZY2Ions.intensity <- sum(data[[i]]$intensity[idY2[dd]])
+        sum.intensity <- sum(data[[i]]$intensity) - sum.mZY2Ions.intensity
+        percent.mZY2Ions <- round(100 *(sum.mZY2Ions.intensity/
+                                (sum.mZY2Ions.intensity +  sum.intensity)), 1)
+        idY2.ppm.error <- (data[[i]]$Y2[dd]-data[[i]]$mZ[idY2][dd])/data[[i]]$Y2[dd]*1e06
+        idY2.mZ <- data[[i]]$mZ[idY2][dd]
+        
+        idY1F <- findNN(data[[i]]$Y1F , data[[i]]$mZ)
+        ppm.errorY1F <- 1e-06 * 20 * data[[i]]$mZ[idY1F]
+        ff <- (abs(data[[i]]$Y1F  - data[[i]]$mZ[idY1F]) < ppm.errorY1F)
+        sum.mZY1FIons.intensity <- sum(data[[i]]$intensity[idY1F[ff]])
+        sum.intensity <- sum(data[[i]]$intensity) - sum.mZY1FIons.intensity
+        percent.mZY1FIons <- round(100 *(sum.mZY1FIons.intensity/
+                                                (sum.mZY1FIons.intensity +  sum.intensity)), 1)
+        idY1F.ppm.error <- (data[[i]]$Y1F[ff]-data[[i]]$mZ[idY1F][ff])/data[[i]]$Y1F[ff]*1e06
+        idY1F.mZ <- data[[i]]$mZ[idY1F][ff]
+        
+        idY2F <- findNN(data[[i]]$Y2F , data[[i]]$mZ)
+        ppm.errorY2F <- 1e-06 * 20 * data[[i]]$mZ[idY2F]
+        gg <- (abs(data[[i]]$Y2F  - data[[i]]$mZ[idY2F]) < ppm.errorY2F)
+        sum.mZY2FIons.intensity <- sum(data[[i]]$intensity[idY2F[gg]])
+        sum.intensity <- sum(data[[i]]$intensity) - sum.mZY2FIons.intensity
+        percent.mZY2FIons <- round(100 *(sum.mZY2FIons.intensity/
+                                                 (sum.mZY2FIons.intensity +  sum.intensity)), 1)
+        idY2F.ppm.error <- (data[[i]]$Y2F[gg]-data[[i]]$mZ[idY2F][gg])/data[[i]]$Y2F[gg]*1e06
+        idY2F.mZ <- data[[i]]$mZ[idY2F][gg]
+        
+        idY3F <- findNN(data[[i]]$Y3F , data[[i]]$mZ)
+        ppm.errorY3F <- 1e-06 * 20 * data[[i]]$mZ[idY3F]
+        kk <- (abs(data[[i]]$Y3F  - data[[i]]$mZ[idY3F]) < ppm.errorY3F)
+        sum.mZY3FIons.intensity <- sum(data[[i]]$intensity[idY3F[kk]])
+        sum.intensity <- sum(data[[i]]$intensity) - sum.mZY3FIons.intensity
+        percent.mZY3FIons <- round(100 *(sum.mZY3FIons.intensity/
+                                                 (sum.mZY3FIons.intensity +  sum.intensity)), 1)
+        idY3F.ppm.error <- (data[[i]]$Y3F[kk]-data[[i]]$mZ[idY3F][kk])/data[[i]]$Y3F[kk]*1e06
+        idY3F.mZ <- data[[i]]$mZ[idY3F][kk]
+        
+        idY3FX <- findNN(data[[i]]$Y3FX , data[[i]]$mZ)
+        ppm.errorY3FX <- 1e-06 * 20 * data[[i]]$mZ[idY3FX]
+        ll <- (abs(data[[i]]$Y3FX  - data[[i]]$mZ[idY3FX]) < ppm.errorY3FX)
+        sum.mZY3FXIons.intensity <- sum(data[[i]]$intensity[idY3FX[ll]])
+        sum.intensity <- sum(data[[i]]$intensity) - sum.mZY3FXIons.intensity
+        percent.mZY3FXIons <- round(100 *(sum.mZY3FXIons.intensity/
+                                                  (sum.mZY3FXIons.intensity +  sum.intensity)), 1)
+        idY3FX.ppm.error <- (data[[i]]$Y3FX[ll]-data[[i]]$mZ[idY3FX][ll])/data[[i]]$Y3FX[ll]*1e06
+        idY3FX.mZ <- data[[i]]$mZ[idY3FX][ll]
+        
+        idY3 <- findNN(data[[i]]$Y3 , data[[i]]$mZ)
+        ppm.errorY3 <- 1e-06 * 20 * data[[i]]$mZ[idY3]
+        cc <- (abs(data[[i]]$Y3  - data[[i]]$mZ[idY3]) < ppm.errorY3)
+        sum.mZY3Ions.intensity <- sum(data[[i]]$intensity[idY3[cc]])
+        sum.intensity <- sum(data[[i]]$intensity) - sum.mZY3Ions.intensity
+        percent.mZY3Ions <- round(100 *(sum.mZY3Ions.intensity/
+                                (sum.mZY3Ions.intensity +  sum.intensity)), 1)
+        idY3.ppm.error <- (data[[i]]$Y3[cc]-data[[i]]$mZ[idY3][cc])/data[[i]]$Y3[cc]*1e06
+        idY3.mZ <- data[[i]]$mZ[idY3][cc]
+        
+        idY3X <- findNN(data[[i]]$Y3X , data[[i]]$mZ)
+        ppm.errorY3X <- 1e-06 * 20 * data[[i]]$mZ[idY3X]
+        hh <- (abs(data[[i]]$Y3X  - data[[i]]$mZ[idY3X]) < ppm.errorY3X)
+        sum.mZY3XIons.intensity <- sum(data[[i]]$intensity[idY3X[hh]])
+        sum.intensity <- sum(data[[i]]$intensity) - sum.mZY3XIons.intensity
+        percent.mZY3XIons <- round(100 *(sum.mZY3XIons.intensity/
+                                                 (sum.mZY3XIons.intensity +  sum.intensity)), 1)
+        idY3X.ppm.error <- (data[[i]]$Y3X[hh]-data[[i]]$mZ[idY3X][hh])/data[[i]]$Y3X[hh]*1e06
+        idY3X.mZ <- data[[i]]$mZ[idY3X][hh]
                       
         idPepPlus <- findNN(data[[i]]$PepPlus , data[[i]]$mZ)
         ppm.errorPepPlus <- 1e-06 * 20 * data[[i]]$mZ[idPepPlus]
@@ -489,18 +768,29 @@ gPSMvalidator <-
                         (sum.mZPepPlusIons.intensity +  sum.intensity)), 1)
         idPepPlus.ppm.error <- (data[[i]]$PepPlus[f]-data[[i]]$mZ[idPepPlus][f])/data[[i]]$PepPlus[f]*1e06
         idPepPlus.mZ <- data[[i]]$mZ[idPepPlus][f]
-                        
+         
+        idY0NH3 <- findNN(data[[i]]$Y0NH3 , data[[i]]$mZ)
+        ppm.errorY0NH3 <- 1e-06 * 20 * data[[i]]$mZ[idY0NH3]
+        mm <- (abs(data[[i]]$Y0NH3  - data[[i]]$mZ[idY0NH3]) < ppm.errorY0NH3)
+        sum.mZY0NH3Ions.intensity <- sum(data[[i]]$intensity[idY0NH3[mm]])
+        sum.intensity <- sum(data[[i]]$intensity) - sum.mZY0NH3Ions.intensity
+        percent.mZY0NH3Ions <- round(100 *(sum.mZY0NH3Ions.intensity/
+                                                   (sum.mZY0NH3Ions.intensity +  sum.intensity)), 1)
+        idY0NH3.ppm.error <- (data[[i]]$Y0NH3[mm]-data[[i]]$mZ[idY0NH3][mm])/data[[i]]$Y0NH3[mm]*1e06
+        idY0NH3.mZ <- data[[i]]$mZ[idY0NH3][mm]
                        
         ido <- findNN(otherOxonium, data[[i]]$mZ)
         ppm.errorOO <- 1e-06 * itol_ppm * data[[i]]$mZ[ido]
         e <- (abs(otherOxonium - data[[i]]$mZ[ido]) < ppm.errorOO)
         sum.otherOxonium.intensity <- sum(data[[i]]$intensity[ido[e]])
         ido.ppm.error <- (otherOxonium[e]-data[[i]]$mZ[ido][e])/otherOxonium[e]*1e06
-         ido.mZ <-   data[[i]]$mZ[ido][e]             
-                        
+         ido.mZ <-   data[[i]]$mZ[ido][e]     
+        
+   if(validate)  {   
+                 
 if ((length(data[[i]]$mZ[idx[b]]) >= minNumberIons) & 
         percent.mZmarkerIons > minMarkerIntensityRatio 
-        & (length(data[[i]]$mZ[idY1[c]]) >= 1) |
+        & (length(data[[i]]$mZ[idY1[c]]) >= 1) &
            (length(data[[i]]$mZ[idPepPlus[f]]) >= 1))
 
         
@@ -510,6 +800,7 @@ if ((length(data[[i]]$mZ[idx[b]]) >= minNumberIons) &
                    query = i, 
                    obs.mass = data[[i]]$obs.mass,
                    GlycanMass = data[[i]]$GlycanMass, 
+                   glycoform.mass = data[[i]]$glycoform.mass,
                    MonoisotopicY1mass = data[[i]]$MonoisotopicY1mass,
                    MonoisotopicPeptideMass = data[[i]]$MonoisotopicPeptideMass,
                    pepmass_unmod = data[[i]]$pepmass_unmod,
@@ -552,13 +843,16 @@ if ((length(data[[i]]$mZ[idx[b]]) >= minNumberIons) &
        check<- peakplot(data[[i]]$peptideSequence, spec = data[[i]], 
                            fi = fi.by, ion.axes = F, 
                            main = list(paste(data[[i]]$sampleName, 
-                                             data[[i]]$sequence, data[[i]]$GlycanMass, sep=" : "), 
+                                             data[[i]]$sequence, 
+                                             data[[i]]$glycoform.mass, 
+                                             data[[i]]$structure, sep=" : "), 
                                        cex = 1),
                            xlim = c(0, max(data[[i]]$mZ)))
       aa.mZ<- data[[i]]$mZ[check$idx][abs(check$mZ.Da.error)<=0.02]
+      sum.aa.intensity <- sum(data[[i]]$intensity[check$idx]) 
       aa.Da.error <- check$mZ.Da.error[abs(check$mZ.Da.error)<=0.02]
       aa.ppm.error <- aa.Da.error/ aa.mZ * 1000000
-                                }
+                              }
          else {
          par(cex = 1)
          plot(data[[i]]$mZ, data[[i]]$intensity, type = "h", 
@@ -567,7 +861,7 @@ if ((length(data[[i]]$mZ[idx[b]]) >= minNumberIons) &
                                data[[i]]$sequence, sep=" : "), cex = 1), 
              xlim = c(0, max(data[[i]]$mZ)))
                                 }
-                            
+                   
         
           points(data[[i]]$mZ[idx[b]], data[[i]]$intensity[idx[b]],
                  pch = 22, col = "green", bg = "green",cex = 0.75)
@@ -575,35 +869,83 @@ if ((length(data[[i]]$mZ[idx[b]]) >= minNumberIons) &
           points(data[[i]]$mZ[idY1[c]], data[[i]]$intensity[idY1[c]], 
                                        pch = 22, col = "red", bg = "red", 
                                        cex = 0.75)
-        #points(data[[i]]$mZ[idX1[dd]], data[[i]]$intensity[idX1[dd]], 
-               #pch = 22, col = "orange", bg = "orange", 
-              # cex = 0.75)
-      points(data[[i]]$mZ[idF1[ff]], data[[i]]$intensity[idF1[ff]], 
+     points(data[[i]]$mZ[idY1Mox[bb]], data[[i]]$intensity[idY1Mox[bb]], 
+           pch = 22, col = "blue", bg = "blue", 
+            cex = 0.75)
+   #  points(data[[i]]$mZ[idY1Ca[ee]], data[[i]]$intensity[idY1Ca[ee]], 
+    #         pch = 22, col = "lightblue", bg = "lightblue", 
+     #        cex = 0.75)
+        points(data[[i]]$mZ[idY2[dd]], data[[i]]$intensity[idY2[dd]], 
+               pch = 22, col = "red", bg = "red", 
+               cex = 0.75)
+      points(data[[i]]$mZ[idY1F[ff]], data[[i]]$intensity[idY1F[ff]], 
              pch = 22, col = "purple", bg = "purple", 
              cex = 0.75)
-       # points(data[[i]]$mZ[idX0[cc]], data[[i]]$intensity[idX0[cc]], 
-        #       pch = 22, col = "orange", bg = "orange", 
-        #       cex = 0.75)
+      points(data[[i]]$mZ[idY2F[gg]], data[[i]]$intensity[idY2F[gg]], 
+             pch = 22, col = "purple", bg = "purple", 
+             cex = 0.75)
+      points(data[[i]]$mZ[idY3F[kk]], data[[i]]$intensity[idY3F[kk]], 
+             pch = 22, col = "purple", bg = "purple", 
+             cex = 0.75)
+      points(data[[i]]$mZ[idY3FX[ll]], data[[i]]$intensity[idY3FX[ll]], 
+             pch = 22, col = "orange", bg = "orange", 
+             cex = 0.75)
+        points(data[[i]]$mZ[idY3[cc]], data[[i]]$intensity[idY3[cc]], 
+              pch = 22, col = "red", bg = "red", 
+              cex = 0.75)
+      points(data[[i]]$mZ[idY3X[hh]], data[[i]]$intensity[idY3X[hh]], 
+             pch = 22, col = "orange", bg = "orange", 
+             cex = 0.75)
           points(data[[i]]$mZ[idPepPlus[f]], data[[i]]$intensity[idPepPlus[f]], 
                                        pch = 22, col = "pink", bg = "pink", 
                                        cex = 0.75)
+    points(data[[i]]$mZ[idY0NH3[mm]], data[[i]]$intensity[idY0NH3[mm]], 
+           pch = 22, col = "pink4", bg = "pink4", 
+           cex = 0.75)
    
           points(data[[i]]$mZ[ido[e]], data[[i]]$intensity[ido[e]], 
                                        pch = 22, col = "black",bg = "black", 
                                        cex = 0.75)
+    sum.ID.intensity <- sum(
+           # sum.mZmarkerIons.intensity, 
+            sum.mZY1Ions.intensity, 
+                            sum.mZY1MoxIons.intensity, 
+            #sum.mZY1CaIons.intensity, 
+                            sum.mZY2Ions.intensity, sum.mZY1FIons.intensity,
+                            sum.mZY2FIons.intensity, sum.mZY3FIons.intensity, sum.mZY3FXIons.intensity,
+                            sum.mZY3Ions.intensity, sum.mZY3XIons.intensity,sum.mZPepPlusIons.intensity, 
+                            sum.mZY0NH3Ions.intensity, sum.otherOxonium.intensity,
+                            sum.aa.intensity)
+    percent.ID <- round(100*sum.ID.intensity/sum(data[[i]]$intensity))
+    #sum.intensity <- sum(data[[i]]$intensity) - sum.ID.intensity
+   # percent.ID <- round(100 *(sum.ID.intensity/
+       #                               (sum.ID.intensity +  sum.intensity)), 1)
+
           
           legend("topright", paste(c( "m/z", "charge", "scan",
-                                      "query"),
+                                      "query"
+                                      #, "% ID intensity"
+                                      ),
           c(round(data[[i]]$precursorMZ,3), data[[i]]$charge,  
-          data[[i]]$scans, i)),cex = 1)
+          data[[i]]$scans, i
+          #, percent.ID
+          )),cex = 1)
         
-      
+  
         
         
-        ppm.error <- c(idx.ppm.error, idY1.ppm.error, idX1.ppm.error, idF1.ppm.error,
-                       idX0.ppm.error, idPepPlus.ppm.error, ido.ppm.error,
+        ppm.error <- c(idx.ppm.error, idY1.ppm.error, 
+                       idY1Mox.ppm.error, 
+                       #idY1Ca.ppm.error, 
+                       idY2.ppm.error, idY1F.ppm.error,
+                       idY2F.ppm.error, idY3F.ppm.error, idY3FX.ppm.error,
+                       idY3.ppm.error, idY3X.ppm.error,idPepPlus.ppm.error, idY0NH3.ppm.error, ido.ppm.error,
                        aa.ppm.error)
-        mZ <- c(idx.mZ, idY1.mZ, idX1.mZ,idF1.mZ, idX0.mZ, idPepPlus.mZ, ido.mZ,
+        mZ <- c(idx.mZ,  idY1.mZ, 
+                idY1Mox.mZ,
+                #idY1Ca.mZ, 
+                idY2.mZ,idY1F.mZ, idY2F.mZ,idY3F.mZ,idY3FX.mZ,
+                idY3.mZ, idY3X.mZ, idPepPlus.mZ, idY0NH3.mZ, ido.mZ,
                 aa.mZ)
         plot(mZ, ppm.error,
              main="Error Plot",
@@ -617,11 +959,17 @@ if ((length(data[[i]]$mZ[idx[b]]) >= minNumberIons) &
        plot(0,xaxt='n',yaxt='n',bty='n',pch='',ylab='',xlab='')
        
        
-       legend("center", paste(c( "HexNAc & fragments", " other oxonium ions", 
-                                                  "Y0", "Y1", "coreFucose")),
+       legend("center", paste(c( "HexNAc+", "Oxonium", 
+                                                  "Y0", "Y0-NH3","Y1,2,3", "YF1,2,3", "YX3,F"
+                                 , "Y1-Mox"
+                                 #, "Y1-Ca"
+                                 )),
               fill=c( "green", 
                       "black", 
-                      "pink", "red", "purple"), bty="n",cex=1)
+                      "pink", "pink4", "red", "purple", "orange"
+                      , "blue"
+                      #, "lightblue"
+                      ), bty="n",cex=1, ncol=2)
        
        
        
@@ -630,249 +978,193 @@ if ((length(data[[i]]$mZ[idx[b]]) >= minNumberIons) &
                                 
                         
                                          
-                        }
-                }
-                close.screen(all.screens = TRUE)
-                return(as.data.frame(rr, stringsAsFactors=FALSE))
-        }
-
-#################################################################
-#        Function 10. gPSMvalidation 
-# validation and spectrum annotation
-#################################################################
-
-justPlot <-
+                        }}
+else {
+        r <- cbind(scans = data[[i]]$scans, 
+                   query = i, 
+                   obs.mass = data[[i]]$obs.mass,
+                   GlycanMass = data[[i]]$GlycanMass, 
+                   glycoform.mass = data[[i]]$glycoform.mass,
+                   MonoisotopicY1mass = data[[i]]$MonoisotopicY1mass,
+                   MonoisotopicPeptideMass = data[[i]]$MonoisotopicPeptideMass,
+                   pepmass_unmod = data[[i]]$pepmass_unmod,
+                   pepmass_mod = data[[i]]$pepmass_mod,
+                   scan.time = data[[i]]$scan.time,
+                   structure = data[[i]]$structure,
+                   precursorMZ = data[[i]]$precursorMZ,
+                   exact.mass = data[[i]]$exact.mass,
+                   precursorMassErrorPpm = data[[i]]$precursorMassErrorPpm,
+                   charge=data[[i]]$charge, 
+                   peptideSequence=data[[i]]$peptideSequence,
+                   sequence=data[[i]]$sequence,
+                   specificity=data[[i]]$specificity,
+                   analysis=data[[i]]$analysis,
+                   q.value=data[[i]]$q.value,
+                   table2Sequence=data[[i]]$table2Sequence,
+                   n.sequence=data[[i]]$n.sequence,
+                   title=data[[i]]$title, modification=data[[i]]$modification)
         
-        function (data, modification, modificationName, mZmarkerIons, 
-                  minNumberIons = 2, itol_ppm = 10, minMarkerIntensityRatio = 2, 
-                  PEAKPLOT=TRUE) 
-        {
+        rr <- rbind(rr, r)
+        
+        def.par <- par(no.readonly = TRUE) # save default, for resetting...
+        
+        layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE), 
+               widths=c(1,1), heights=c(1.25,1))
+        
+        
+        if (!is.na(data[[i]]$q.value)) {
                 
-                query.idx <- 1:length(data)
-                query.to.scan <- as.integer(as.character(lapply(data, 
-                                                                function(x) {
-                                                                        if (length(x$scans) == 1) {
-                                                                                return(x$scans)
-                                                                        } else {
-                                                                                return(x$scans[1])
-                                                                        }
-                                                                })))
-                scan.to.query <- rep(-1, max(query.to.scan, na.rm = TRUE))
-                scan.to.query[query.to.scan[query.idx]] <- query.idx
                 
-                rr <- numeric()
-                for (i in 1:length(data)) {
-                        
-                        idx <- findNN(mZmarkerIons, data[[i]]$mZ)
-                        ppm.error <- 1e-06 * itol_ppm * data[[i]]$mZ[idx]
-                        b <- (abs(mZmarkerIons - data[[i]]$mZ[idx]) < ppm.error)
-                        sum.mZmarkerIons.intensity <- sum(data[[i]]$intensity[idx[b]])
-                        sum.intensity <- sum(data[[i]]$intensity) - sum.mZmarkerIons.intensity
-                        percent.mZmarkerIons <- round(100 * (sum.mZmarkerIons.intensity/
-                                                                     (sum.mZmarkerIons.intensity + sum.intensity)), 1)
-                        idx.ppm.error <- (mZmarkerIons[b]-data[[i]]$mZ[idx][b])/mZmarkerIons[b]*1e06
-                        idx.mZ <- data[[i]]$mZ[idx][b]
-                        
-                        idY1 <- findNN(data[[i]]$Y1 , data[[i]]$mZ)
-                        ppm.errorY1 <- 1e-06 * 20 * data[[i]]$mZ[idY1]
-                        c <- (abs(data[[i]]$Y1  - data[[i]]$mZ[idY1]) < ppm.errorY1)
-                        sum.mZY1Ions.intensity <- sum(data[[i]]$intensity[idY1[c]])
-                        sum.intensity <- sum(data[[i]]$intensity) - sum.mZY1Ions.intensity
-                        percent.mZY1Ions <- round(100 *(sum.mZY1Ions.intensity/
-                                                                (sum.mZY1Ions.intensity +  sum.intensity)), 1)
-                        idY1.ppm.error <- (data[[i]]$Y1[c]-data[[i]]$mZ[idY1][c])/data[[i]]$Y1[c]*1e06
-                        idY1.mZ <- data[[i]]$mZ[idY1][c]
-                        
-                        idX1 <- findNN(data[[i]]$X1 , data[[i]]$mZ)
-                        ppm.errorX1 <- 1e-06 * 20 * data[[i]]$mZ[idX1]
-                        dd <- (abs(data[[i]]$X1  - data[[i]]$mZ[idX1]) < ppm.errorX1)
-                        sum.mZX1Ions.intensity <- sum(data[[i]]$intensity[idX1[dd]])
-                        sum.intensity <- sum(data[[i]]$intensity) - sum.mZX1Ions.intensity
-                        percent.mZX1Ions <- round(100 *(sum.mZX1Ions.intensity/
-                                                                (sum.mZX1Ions.intensity +  sum.intensity)), 1)
-                        idX1.ppm.error <- (data[[i]]$X1[dd]-data[[i]]$mZ[idX1][dd])/data[[i]]$X1[dd]*1e06
-                        idX1.mZ <- data[[i]]$mZ[idX1][dd]
-                        
-                        idF1 <- findNN(data[[i]]$F1 , data[[i]]$mZ)
-                        ppm.errorF1 <- 1e-06 * 20 * data[[i]]$mZ[idF1]
-                        ff <- (abs(data[[i]]$F1  - data[[i]]$mZ[idF1]) < ppm.errorF1)
-                        sum.mZF1Ions.intensity <- sum(data[[i]]$intensity[idF1[ff]])
-                        sum.intensity <- sum(data[[i]]$intensity) - sum.mZF1Ions.intensity
-                        percent.mZF1Ions <- round(100 *(sum.mZF1Ions.intensity/
-                                                                (sum.mZF1Ions.intensity +  sum.intensity)), 1)
-                        idF1.ppm.error <- (data[[i]]$F1[ff]-data[[i]]$mZ[idF1][ff])/data[[i]]$F1[ff]*1e06
-                        idF1.mZ <- data[[i]]$mZ[idF1][ff]
-                        
-                        idX0 <- findNN(data[[i]]$X0 , data[[i]]$mZ)
-                        ppm.errorX0 <- 1e-06 * 20 * data[[i]]$mZ[idX0]
-                        cc <- (abs(data[[i]]$X0  - data[[i]]$mZ[idX0]) < ppm.errorX0)
-                        sum.mZX0Ions.intensity <- sum(data[[i]]$intensity[idX0[cc]])
-                        sum.intensity <- sum(data[[i]]$intensity) - sum.mZX0Ions.intensity
-                        percent.mZX0Ions <- round(100 *(sum.mZX0Ions.intensity/
-                                                                (sum.mZX0Ions.intensity +  sum.intensity)), 1)
-                        idX0.ppm.error <- (data[[i]]$X0[cc]-data[[i]]$mZ[idX0][cc])/data[[i]]$X0[cc]*1e06
-                        idX0.mZ <- data[[i]]$mZ[idX0][cc]
-                        
-                        idPepPlus <- findNN(data[[i]]$PepPlus , data[[i]]$mZ)
-                        ppm.errorPepPlus <- 1e-06 * 20 * data[[i]]$mZ[idPepPlus]
-                        f <- (abs(data[[i]]$PepPlus  - data[[i]]$mZ[idPepPlus]) < 
-                                      ppm.errorPepPlus)
-                        sum.mZPepPlusIons.intensity <- sum(data[[i]]$intensity[idPepPlus[f]])
-                        sum.intensity <- sum(data[[i]]$intensity) - sum.mZPepPlusIons.intensity
-                        percent.mZPepPlusIons <- round(100 * (sum.mZPepPlusIons.intensity/
-                                                                      (sum.mZPepPlusIons.intensity +  sum.intensity)), 1)
-                        idPepPlus.ppm.error <- (data[[i]]$PepPlus[f]-data[[i]]$mZ[idPepPlus][f])/data[[i]]$PepPlus[f]*1e06
-                        idPepPlus.mZ <- data[[i]]$mZ[idPepPlus][f]
-                        
-                        
-                        ido <- findNN(otherOxonium, data[[i]]$mZ)
-                        ppm.errorOO <- 1e-06 * itol_ppm * data[[i]]$mZ[ido]
-                        e <- (abs(otherOxonium - data[[i]]$mZ[ido]) < ppm.errorOO)
-                        sum.otherOxonium.intensity <- sum(data[[i]]$intensity[ido[e]])
-                        ido.ppm.error <- (otherOxonium[e]-data[[i]]$mZ[ido][e])/otherOxonium[e]*1e06
-                        ido.mZ <-   data[[i]]$mZ[ido][e]             
-                        
-                        if (length(data[[i]]$mZ[idx[b]]) >= minNumberIons & 
-                                percent.mZmarkerIons >= minMarkerIntensityRatio 
-                           # & (length(data[[i]]$mZ[idY1[c]]) >= 0) |
-                            #        (length(data[[i]]$mZ[idPepPlus[f]]) >= 0)
-                            )
-                                
-                                
-                        {
-                                
-                                r <- cbind(scans = data[[i]]$scans, 
-                                           query = i, 
-                                           obs.mass = data[[i]]$obs.mass,
-                                           GlycanMass = data[[i]]$GlycanMass, 
-                                           MonoisotopicY1mass = data[[i]]$MonoisotopicY1mass,
-                                           MonoisotopicPeptideMass = data[[i]]$MonoisotopicPeptideMass,
-                                           pepmass_unmod = data[[i]]$pepmass_unmod,
-                                           pepmass_mod = data[[i]]$pepmass_mod,
-                                           scan.time = data[[i]]$scan.time,
-                                           structure = data[[i]]$structure,
-                                           precursorMZ = data[[i]]$precursorMZ,
-                                           exact.mass = data[[i]]$exact.mass,
-                                           precursorMassErrorPpm = data[[i]]$precursorMassErrorPpm,
-                                           charge=data[[i]]$charge, 
-                                           peptideSequence=data[[i]]$peptideSequence,
-                                           sequence=data[[i]]$sequence,
-                                           specificity=data[[i]]$specificity,
-                                           analysis=data[[i]]$analysis,
-                                           q.value=data[[i]]$q.value,
-                                           table2Sequence=data[[i]]$table2Sequence,
-                                           n.sequence=data[[i]]$n.sequence,
-                                           title=data[[i]]$title, modification=data[[i]]$modification)
-                                
-                                rr <- rbind(rr, r)
-                                
-                                def.par <- par(no.readonly = TRUE) # save default, for resetting...
-                                
-                                layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE), 
-                                       widths=c(1,1), heights=c(1.25,1))
-                                
-                                
-                                if (!is.na(data[[i]]$q.value)) {
-                                        
-                                        
-                                        
-                                        fi <- fragmentIon(sequence = data[[i]]$peptideSequence, 
-                                                          FUN = defaultIons, 
-                                                          modified = substr(data[[i]]$modification, 2, 
-                                                                            nchar(data[[i]]$modification) - 1), 
-                                                          modification = modification)
-                                        
-                                        fi.by <- as.data.frame(cbind(b = fi[[1]]$b, y = fi[[1]]$y))
-                                        
-                                        check<- peakplot(data[[i]]$peptideSequence, spec = data[[i]], 
-                                                         fi = fi.by, ion.axes = F, 
-                                                         main = list(paste(data[[i]]$sampleName, 
-                                                                           data[[i]]$sequence, data[[i]]$GlycanMass, sep=" : "), 
-                                                                     cex = 1),
-                                                         xlim = c(0, max(data[[i]]$mZ)))
-                                        aa.mZ<- data[[i]]$mZ[check$idx][abs(check$mZ.Da.error)<=0.02]
-                                        aa.Da.error <- check$mZ.Da.error[abs(check$mZ.Da.error)<=0.02]
-                                        aa.ppm.error <- aa.Da.error/ aa.mZ * 1000000
-                                }
-                                else {
-                                        par(cex = 1)
-                                        plot(data[[i]]$mZ, data[[i]]$intensity, type = "h", 
-                                             xlab = "m/z", ylab = "Intensity", 
-                                             main = list(paste(data[[i]]$sampleName, 
-                                                               data[[i]]$sequence, sep=" : "), cex = 1), 
-                                             xlim = c(0, max(data[[i]]$mZ)))
-                                }
-                                
-                                
-                                points(data[[i]]$mZ[idx[b]], data[[i]]$intensity[idx[b]],
-                                       pch = 22, col = "green", bg = "green",cex = 0.75)
-                                
-                                points(data[[i]]$mZ[idY1[c]], data[[i]]$intensity[idY1[c]], 
-                                       pch = 22, col = "red", bg = "red", 
-                                       cex = 0.75)
-                                #points(data[[i]]$mZ[idX1[dd]], data[[i]]$intensity[idX1[dd]], 
-                                      # pch = 22, col = "orange", bg = "orange", 
-                                      # cex = 0.75)
-                                points(data[[i]]$mZ[idF1[ff]], data[[i]]$intensity[idF1[ff]], 
-                                       pch = 22, col = "purple", bg = "purple", 
-                                       cex = 0.75)
-                               # points(data[[i]]$mZ[idX0[cc]], data[[i]]$intensity[idX0[cc]], 
-                                   #    pch = 22, col = "orange", bg = "orange", 
-                                    #   cex = 0.75)
-                                points(data[[i]]$mZ[idPepPlus[f]], data[[i]]$intensity[idPepPlus[f]], 
-                                       pch = 22, col = "pink", bg = "pink", 
-                                       cex = 0.75)
-                                
-                                points(data[[i]]$mZ[ido[e]], data[[i]]$intensity[ido[e]], 
-                                       pch = 22, col = "black",bg = "black", 
-                                       cex = 0.75)
-                                
-                                legend("topright", paste(c( "m/z", "charge", "scan", "analysis",
-                                                            "query"),
-                                                         c(round(data[[i]]$precursorMZ,3), data[[i]]$charge,  
-                                                           data[[i]]$scans,data[[i]]$analysis, i)),cex = 1)
-                                
-                                
-                                
-                                
-                                ppm.error <- c(idx.ppm.error, idY1.ppm.error, idX1.ppm.error, 
-                                               idF1.ppm.error,
-                                               idX0.ppm.error, idPepPlus.ppm.error, ido.ppm.error,
-                                               aa.ppm.error)
-                                mZ <- c(idx.mZ, idY1.mZ, idX1.mZ, 
-                                        idF1.mZ,idX0.mZ, idPepPlus.mZ, ido.mZ,
-                                        aa.mZ)
-                                plot(mZ, ppm.error,
-                                     main="Error Plot",
-                                     pch='o',
-                                     cex=0.5, 
-                                     ylim = c(-10* itol_ppm, 10* itol_ppm) )
-                                
-                                
-                                
-                                
-                                plot(0,xaxt='n',yaxt='n',bty='n',pch='',ylab='',xlab='')
-                                
-                                
-                                legend("center", paste(c( "HexNAc & fragments", " other oxonium ions", 
-                                                          "Y0", "Y1", "coreFucose")),
-                                       fill=c( "green", 
-                                               "black", 
-                                               "pink", "red", "purple"), bty="n",cex=1)
-                                
-                                
-                                
-                                
-                                par(def.par)  #- reset to default
-                                
-                                
-                                
-                        }
+                
+                fi <- fragmentIon(sequence = data[[i]]$peptideSequence, 
+                                  FUN = defaultIons, 
+                                  modified = substr(data[[i]]$modification, 2, 
+                                                    nchar(data[[i]]$modification) - 1), 
+                                  modification = modification)
+                
+                fi.by <- as.data.frame(cbind(b = fi[[1]]$b, y = fi[[1]]$y))
+                
+                check<- peakplot(data[[i]]$peptideSequence, spec = data[[i]], 
+                                 fi = fi.by, ion.axes = F, 
+                                 main = list(paste(data[[i]]$sampleName, 
+                                                   data[[i]]$sequence, 
+                                                   data[[i]]$glycoform.mass, 
+                                                   data[[i]]$structure, sep=" : "), 
+                                             cex = 1),
+                                 xlim = c(0, max(data[[i]]$mZ)))
+                aa.mZ<- data[[i]]$mZ[check$idx][abs(check$mZ.Da.error)<=0.02]
+                sum.aa.intensity <- sum(data[[i]]$intensity[check$idx]) 
+                aa.Da.error <- check$mZ.Da.error[abs(check$mZ.Da.error)<=0.02]
+                aa.ppm.error <- aa.Da.error/ aa.mZ * 1000000
+        }
+        else {
+                par(cex = 1)
+                plot(data[[i]]$mZ, data[[i]]$intensity, type = "h", 
+                     xlab = "m/z", ylab = "Intensity", 
+                     main = list(paste(data[[i]]$sampleName, 
+                                       data[[i]]$sequence, sep=" : "), cex = 1), 
+                     xlim = c(0, max(data[[i]]$mZ)))
+        }
+        
+        
+        points(data[[i]]$mZ[idx[b]], data[[i]]$intensity[idx[b]],
+               pch = 22, col = "green", bg = "green",cex = 0.75)
+        
+        points(data[[i]]$mZ[idY1[c]], data[[i]]$intensity[idY1[c]], 
+               pch = 22, col = "red", bg = "red", 
+               cex = 0.75)
+        points(data[[i]]$mZ[idY1Mox[bb]], data[[i]]$intensity[idY1Mox[bb]], 
+               pch = 22, col = "blue", bg = "blue", 
+               cex = 0.75)
+       # points(data[[i]]$mZ[idY1Ca[ee]], data[[i]]$intensity[idY1Ca[ee]], 
+             #  pch = 22, col = "lightblue", bg = "lightblue", 
+            #   cex = 0.75)
+        points(data[[i]]$mZ[idY2[dd]], data[[i]]$intensity[idY2[dd]], 
+               pch = 22, col = "red", bg = "red", 
+               cex = 0.75)
+        points(data[[i]]$mZ[idY1F[ff]], data[[i]]$intensity[idY1F[ff]], 
+               pch = 22, col = "purple", bg = "purple", 
+               cex = 0.75)
+        points(data[[i]]$mZ[idY2F[gg]], data[[i]]$intensity[idY2F[gg]], 
+               pch = 22, col = "purple", bg = "purple", 
+               cex = 0.75)
+        points(data[[i]]$mZ[idY3F[kk]], data[[i]]$intensity[idY3F[kk]], 
+               pch = 22, col = "purple", bg = "purple", 
+               cex = 0.75)
+        points(data[[i]]$mZ[idY3FX[ll]], data[[i]]$intensity[idY3FX[ll]], 
+               pch = 22, col = "orange", bg = "orange", 
+               cex = 0.75)
+        points(data[[i]]$mZ[idY3[cc]], data[[i]]$intensity[idY3[cc]], 
+               pch = 22, col = "red", bg = "red", 
+               cex = 0.75)
+        points(data[[i]]$mZ[idY3X[hh]], data[[i]]$intensity[idY3X[hh]], 
+               pch = 22, col = "orange", bg = "orange", 
+               cex = 0.75)
+        points(data[[i]]$mZ[idPepPlus[f]], data[[i]]$intensity[idPepPlus[f]], 
+               pch = 22, col = "pink", bg = "pink", 
+               cex = 0.75)
+        points(data[[i]]$mZ[idY0NH3[mm]], data[[i]]$intensity[idY0NH3[mm]], 
+               pch = 22, col = "pink4", bg = "pink4", 
+               cex = 0.75)
+        
+        points(data[[i]]$mZ[ido[e]], data[[i]]$intensity[ido[e]], 
+               pch = 22, col = "black",bg = "black", 
+               cex = 0.75)
+        sum.ID.intensity <- sum(
+                # sum.mZmarkerIons.intensity, 
+                sum.mZY1Ions.intensity, 
+                sum.mZY1MoxIons.intensity, 
+                #sum.mZY1CaIons.intensity, 
+                sum.mZY2Ions.intensity, sum.mZY1FIons.intensity,
+                sum.mZY2FIons.intensity, sum.mZY3FIons.intensity, sum.mZY3FXIons.intensity,
+                sum.mZY3Ions.intensity, sum.mZY3XIons.intensity,sum.mZPepPlusIons.intensity, 
+                sum.mZY0NH3Ions.intensity, sum.otherOxonium.intensity,
+                sum.aa.intensity)
+        percent.ID <- round(100*sum.ID.intensity/sum(data[[i]]$intensity))
+        #sum.intensity <- sum(data[[i]]$intensity) - sum.ID.intensity
+        # percent.ID <- round(100 *(sum.ID.intensity/
+        #                               (sum.ID.intensity +  sum.intensity)), 1)
+        
+        
+        legend("topright", paste(c( "m/z", "charge", "scan",
+                                    "query"
+                                    #, "% ID intensity"
+        ),
+        c(round(data[[i]]$precursorMZ,3), data[[i]]$charge,  
+          data[[i]]$scans, i
+          #, percent.ID
+        )),cex = 1)
+        
+        
+        
+        
+        ppm.error <- c(idx.ppm.error, idY1.ppm.error, 
+                       idY1Mox.ppm.error, 
+                       #idY1Ca.ppm.error, 
+                       idY2.ppm.error, idY1F.ppm.error,
+                       idY2F.ppm.error, idY3F.ppm.error, idY3FX.ppm.error,
+                       idY3.ppm.error, idY3X.ppm.error,idPepPlus.ppm.error, idY0NH3.ppm.error, ido.ppm.error,
+                       aa.ppm.error)
+        mZ <- c(idx.mZ,  idY1.mZ, 
+                idY1Mox.mZ, 
+                #idY1Ca.mZ, 
+                idY2.mZ,idY1F.mZ, idY2F.mZ,idY3F.mZ,idY3FX.mZ,
+                idY3.mZ, idY3X.mZ, idPepPlus.mZ, idY0NH3.mZ, ido.mZ,
+                aa.mZ)
+        plot(mZ, ppm.error,
+             main="Error Plot",
+             pch='o',
+             cex=0.5, 
+             ylim = c(-10* itol_ppm, 10* itol_ppm)
+        )
+        
+        
+        
+        plot(0,xaxt='n',yaxt='n',bty='n',pch='',ylab='',xlab='')
+        
+        
+        legend("center", paste(c( "HexNAc+", "Oxonium", 
+                                  "Y0", "Y0-NH3","Y1,2,3", "YF1,2,3", "YX3,F"
+                                  , "Y1-Mox"
+                                  #, "Y1-Ca"
+        )),
+        fill=c( "green", 
+                "black", 
+                "pink", "pink4", "red", "purple", "orange"
+                , "blue"
+                #, "lightblue"
+        ), bty="n",cex=1, ncol=2)
+        
+        
+        
+        
+        par(def.par)  #- reset to default
+        
+}
                 }
                 close.screen(all.screens = TRUE)
                 return(as.data.frame(rr, stringsAsFactors=FALSE))
         }
-
 
 
 ##############################################################################
@@ -1134,7 +1426,7 @@ glycosylationProfileTables <- function(dat) {
         
         names(Table2) <- c("Asn", "peptideMass", "n.sequence", 
                            "table2Sequence", "count", "min.rt",
-                           "max.rt", "glycan.L", "glycan.S")
+                           "max.rt", "glycan.S", "glycan.L")
         
         
         ##########################################################
@@ -1252,7 +1544,7 @@ Read.SICData <- function (dir="quantitation_Chym1_ELUTE", Asn=211) {
 #   Function. 21. RQ of glycoforms
 ##############################################################################
 
-glycoRQ <- function(RQ, Table2, dir) {
+glycoRQ <- function(RQ, Table2, dir, rt.min.minus, rt.min.plus) {
         
         rr <- numeric()
         
@@ -1270,8 +1562,14 @@ glycoRQ <- function(RQ, Table2, dir) {
                 RQ.Asn <- RQ[RQ$Asn==Asn,]
                 
                 # subset data calculate stuff and write a data frame
-                Asn.min.rt <- Table2$min.rt[Table2$table2Sequence==unique(RQ.Asn$table2Sequence)]
-                Asn.max.rt <- Table2$max.rt[Table2$table2Sequence==unique(RQ.Asn$table2Sequence)]
+                #Asn.min.rt <- Table2$min.rt[Table2$table2Sequence==unique(RQ.Asn$table2Sequence)]
+                #Asn.max.rt <- Table2$max.rt[Table2$table2Sequence==unique(RQ.Asn$table2Sequence)]
+                
+               Asn.min.rt <- 
+                        ((Table2$min.rt[Table2$table2Sequence==unique(RQ.Asn$table2Sequence)]) - rt.min.minus)
+                Asn.max.rt <- 
+                       ((Table2$min.rt[Table2$table2Sequence==unique(RQ.Asn$table2Sequence)]) + rt.min.plus)
+             
                 
                 subset_SICData <- lapply (SICData, function(x) 
                         subset(x, x$rt.min >= Asn.min.rt & x$rt.min <= Asn.max.rt))
@@ -1606,7 +1904,7 @@ psm <-
 #   Function 15. Restrict the IDPdb from glycoMod search to the retention time
 # determined and recorded in table 2
 ##############################################################################
-rt.restrict <- function(IDPdb, Table2, rt.minus, rt.plus) {
+rt.restrict <- function(IDPdb, Table2, rt.min.minus, rt.min.plus) {
         
         rr <- numeric()
         
@@ -1623,9 +1921,9 @@ IDPdb.table2Sequence <- IDPdb[IDPdb$table2Sequence==table2Sequence,]
                 
 # subset data calculate stuff and write a data frame
 table2Sequence.min.rt <- 
-        ((Table2$min.rt[Table2$table2Sequence==unique(IDPdb.table2Sequence$table2Sequence)]) - rt.minus)
+        ((Table2$min.rt[Table2$table2Sequence==unique(IDPdb.table2Sequence$table2Sequence)]) - rt.min.minus)
 table2Sequence.max.rt <- 
-        ((Table2$max.rt[Table2$table2Sequence==unique(IDPdb.table2Sequence$table2Sequence)]) + rt.plus)
+        ((Table2$min.rt[Table2$table2Sequence==unique(IDPdb.table2Sequence$table2Sequence)]) + rt.min.plus)
                 
                 
 IDPdb.subset<-  subset(IDPdb.table2Sequence, IDPdb.table2Sequence$Scan.Time >= table2Sequence.min.rt 
