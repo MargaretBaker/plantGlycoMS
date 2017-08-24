@@ -1,0 +1,16 @@
+Package: plantGlycoMS
+Type: Package
+Title: A package for processing plant glycosylation MS data
+Version: 0.1
+Date: 2016-01-01
+Author: Margaret Baker
+Maintainer: Margaret Baker <mruzicka@hawaii.edu>
+Description: A package for processing plant glycosylation MS data.
+License: GPL-2
+LazyLoad: yes
+Imports:
+    protViz
+RoxygenNote: 6.0.1
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr
