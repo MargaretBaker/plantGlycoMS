@@ -1,9 +1,11 @@
-#' spectrumTable
-#'
-#' This function calculates the monoisotopic precursor mass from the precursor mz.
-#' @param input The name of the csv file containing precursor m/z values.  For the MiMB workflow, use the precursor m/z column of the spectrum table obtained from an msaccess search (proteowizard). 
-#' @return This function returns a data.frame including the input and additionally the monoisotopic precursor masses.
-#' @export
+################################################################################
+#   Function 1. Add in the spectrum table and calculate the MonoPrecursorMass
+#
+# input is the spectrum table obtained from an msaccess search (proteowizard)
+# this function is needed to calculate the monoisotopic precursor mass from the
+# precursor mz
+################################################################################
+
 spectrumTable <- function (input) {
         
 spectrumTable <- read.csv(file=input, header=TRUE, skip=1)
@@ -12,18 +14,20 @@ spectrumTable$MonoPrecursorMass <- (spectrumTable$precursorMZ *
                                             spectrumTable$charge - 
                                             (spectrumTable$charge * 1.007276 )) 
         
-        return(spectrumTable) 
+        return(spectrumTable)
+        
+        
 }
-#' glycoChainSaw
-#'
-#' This function takes in the results of an in silico digest with chainsaw in tsv format, optionally adds the mass for carbamidomethylation of cysteines (+57) as a fixed modification, optionally adds the mass for oxidation of methionine (+16) as a variable modification, and optionally returns a list of only peptides with a glycosylation site.
-#' @param digest.N a chainsaw in silico digest with all glycosylation sites having a capital n (N).
-#' @param digest.n a chainsaw in silico digest with all glycosylation sites having a lower case n.
-#' @param carbamidomethylation if TRUE, 57 Da is added to the peptide mass for every cysteine present, default=TRUE
-#' @param methionineOxidation if TRUE, 16 Da is added to the peptide mass for every methionine present,and a new row is added to the table so that every methionine containing peptide has a value for oxidized and not oxidized, default=TRUE
-#' @param glycoOnly if TRUE, return a dataframe containing only data for peptide with glycosylation sites, default=TRUE
-#' @return A data.frame with modified in silico digest results
-#' @export
+
+
+###############################################################################################################
+# Function 2: glycoChainSaw
+# this function takes in results from chainsaw with glycosylation site labeled (digest.n)
+# and unlabled (digest.N). It combines these and optionally adds the mass for carbamidomethylation
+# the output is a dataframe that has a column identifying the glycosylation site in the sequence with "n"
+# it can optionally return a dataframe containing only data for peptide with glycosylation sites
+###############################################################################################################
+
 glycoChainSaw <- function(digest.N, digest.n, carbamidomethylation=TRUE, methionineOxidation=TRUE, glycoOnly =TRUE) {
   
   
@@ -83,13 +87,11 @@ glycoChainSaw <- function(digest.N, digest.n, carbamidomethylation=TRUE, methion
   
   return(digest.Nn)
 }
+################################################################################
+#  3. GlycoMod Results (filtered) - PreferredDeltaMasses
+# input for this function is the output of pGlycoFilter
+################################################################################
 
-#' PreferredDeltaMasses
-#'
-#' this function is used to make a vector of glycan masses with "N!{P}[ST] * " pasted in front of the glycan masses which can be pasted into a MyriMatch configuration file.
-#' @param input A vector of glycan masses (from the pGlycoFilter function)
-#' @return A vector of glycan masses with "N!{P}[ST] * " pasted in front of the glycan masses
-#' @export
 PreferredDeltaMasses <- function (input)
 {
         
@@ -107,7 +109,6 @@ PreferredDeltaMasses <- function (input)
 # dir: a directory containing all of the MS2 data files
 ##############################################################################
 
-#' @export
 Read.IDPdb <- function (IDPdb, ChainSaw,dir) {
         
 
@@ -325,7 +326,6 @@ Read.IDPdb <- function (IDPdb, ChainSaw,dir) {
 #        Function 5. Read in MS2 data with IDPdb
 ###########################################################
 
-#' @export
 Read.MS2Data <- function (IDPdb, dir="convertedData/MS2Data_Chym1_ELUTE") {
         
 read.dat <- function(file="ljz_20131022_MR_Chym2_ELUTE.mzML.binary.sn1801.txt") 
@@ -357,7 +357,6 @@ read.dat <- function(file="ljz_20131022_MR_Chym2_ELUTE.mzML.binary.sn1801.txt")
 # validating the gPSMs.
 ##############################################################################
 
-#' @export
 calculateIons <- function (IDPdb) {
         
         Ions <- vector( mode="list", length=length(1:nrow(IDPdb)))
@@ -415,7 +414,6 @@ return(Ions)
 
 # identify the Y1 (MonoisotopicY1mass) peak.
 
-#' @export
 find_Y1 <- function(MonoisotopicY1mass, charge ) {
         
         Y1 <- ((MonoisotopicY1mass + ( charge * 1.007276 ) ) / charge)
@@ -428,7 +426,7 @@ find_Y1 <- function(MonoisotopicY1mass, charge ) {
 #        Function 8. Calculate the Y1Mox masses, ie the mass if lost methane sulfenic acid
 #########################################
 
-#' @export
+
 find_Y1Mox <- function(MonoisotopicY1mass, charge ) {
         
         Y1Mox <- (((MonoisotopicY1mass-64.10686) + ( charge * 1.007276 ) ) 
@@ -441,7 +439,7 @@ find_Y1Mox <- function(MonoisotopicY1mass, charge ) {
 #        Function 9. Calculate the Y1Ca masses, ie the mass if lost carbamidomethyl
 #########################################
 
-#' @export
+
 find_Y1Ca <- function(MonoisotopicY1mass, charge ) {
         
         Y1Ca <- (((MonoisotopicY1mass-57.021464) + ( charge * 1.007276 ) ) 
@@ -457,7 +455,7 @@ find_Y1Ca <- function(MonoisotopicY1mass, charge ) {
 #########################################
 
 # identify the Peptide masses (of glycopeptides that lost the whole glycan)
-#' @export
+
 find_PepPlus <- function(MonoisotopicPeptideMass, charge ) {
         
         PP <- ((MonoisotopicPeptideMass + ( charge * 1.007276 ) ) / charge)
@@ -471,7 +469,7 @@ find_PepPlus <- function(MonoisotopicPeptideMass, charge ) {
 #########################################
 
 # identify the Peptide masses (of glycopeptides that lost the whole glycan)
-#' @export
+
 find_Y0NH3 <- function(MonoisotopicPeptideMass, charge ) {
         
         Y0NH3 <- (((MonoisotopicPeptideMass- 17.026549) + ( charge * 1.007276 ) ) 
@@ -485,7 +483,7 @@ find_Y0NH3 <- function(MonoisotopicPeptideMass, charge ) {
 #        Function 12. Calculate the Y1F masses, ie the mass if core fucose present
 #########################################
 
-#' @export
+
 find_Y1F <- function(MonoisotopicY1mass, charge ) {
         
         Y1F <- (((MonoisotopicY1mass+146.057909) + ( charge * 1.007276 ) ) 
@@ -499,7 +497,7 @@ find_Y1F <- function(MonoisotopicY1mass, charge ) {
 #        Function 13. Calculate the Y1F masses, ie the mass if core fucose present
 #########################################
 
-#' @export
+
 find_Y2F <- function(MonoisotopicY1mass, charge ) {
         
         Y2F <- (((MonoisotopicY1mass+146.057909+203.079373) + ( charge * 1.007276 ) ) 
@@ -513,7 +511,7 @@ find_Y2F <- function(MonoisotopicY1mass, charge ) {
 #        Function 14. Calculate the Y1F masses, ie the mass if core fucose present
 #########################################
 
-#' @export
+
 find_Y3F <- function(MonoisotopicY1mass, charge ) {
         
         Y3F <- (((MonoisotopicY1mass+146.057909+203.079373+162.052824) + ( charge * 1.007276 ) ) 
@@ -527,7 +525,7 @@ find_Y3F <- function(MonoisotopicY1mass, charge ) {
 #        Function 15. Calculate the Y1F masses, ie the mass if core fucose present
 #########################################
 
-#' @export
+
 find_Y3FX <- function(MonoisotopicY1mass, charge ) {
         
         Y3FX <- (((MonoisotopicY1mass+146.057909+203.079373+162.052824+132.042259) + ( charge * 1.007276 ) ) 
@@ -542,7 +540,7 @@ find_Y3FX <- function(MonoisotopicY1mass, charge ) {
 #        Function 16. Calculate the Y2 masses, ie the mass if core fucose present
 #########################################
 
-#' @export
+
 find_Y2 <- function(MonoisotopicY1mass, charge ) {
         
         Y2 <- (((MonoisotopicY1mass+203.079373 ) + ( charge * 1.007276 ) ) 
@@ -556,7 +554,7 @@ find_Y2 <- function(MonoisotopicY1mass, charge ) {
 #        Function 17. Calculate the Y3 masses, ie the mass if core fucose present
 #########################################
 
-#' @export
+
 find_Y3 <- function(MonoisotopicY1mass, charge ) {
         
         Y3 <- (((MonoisotopicY1mass+ 203.079373 + 162.052824  ) + ( charge * 1.007276 ) ) 
@@ -570,7 +568,7 @@ find_Y3 <- function(MonoisotopicY1mass, charge ) {
 #        Function 18. Calculate the Y3X masses, ie the mass if core xylose present
 #########################################
 
-#' @export
+
 find_Y3X <- function(MonoisotopicY1mass, charge ) {
         
         Y3X <- (((MonoisotopicY1mass+ 203.079373 + 162.052824 +  132.042259 ) + ( charge * 1.007276 ) ) 
@@ -583,7 +581,7 @@ find_Y3X <- function(MonoisotopicY1mass, charge ) {
 ###############################################################################
 #  19. Compile all of the data into one list
 ##############################################################################
-#' @export
+
 compileData <- function (analysis="analysis", sampleName="results", 
                          IDPdb=IDPdb, MS2Data=MS2Data, Ions=Ions) {
         
@@ -652,7 +650,6 @@ compileData <- function (analysis="analysis", sampleName="results",
 # validation and spectrum annotation
 #################################################################
 
-#' @export
 gPSMvalidator <-
         
         function (data, modification, modificationName, mZmarkerIons, 
@@ -816,7 +813,12 @@ gPSMvalidator <-
                         
                         if(validate)  {   
                                 
-                                if ((length(data[[i]]$mZ[idx[b]]) >= minMarkerIons) & 
+                                if ((data[[i]]$GlycanMass == 203) &
+                                    (length(data[[i]]$mZ[idx[b]]) >= minMarkerIons) & 
+                                    percent.mZmarkerIons > minMarkerIntensityRatio |
+                                    
+                                    (data[[i]]$GlycanMass == 0) |
+                                        (length(data[[i]]$mZ[idx[b]]) >= minMarkerIons) & 
                                     percent.mZmarkerIons > minMarkerIntensityRatio 
                                     & (length(data[[i]]$mZ[idY1[c]]) >= 1) &
                                     (length(data[[i]]$mZ[idPepPlus[f]]) >= 1))
@@ -861,7 +863,7 @@ gPSMvalidator <-
                                                 
                                                 
                                                 
-                                                fi <- fragmentIon(sequence = data[[i]]$peptideSequence, 
+                                                fi <- protViz::fragmentIon(sequence = data[[i]]$peptideSequence, 
                                                                   FUN = defaultIons, 
                                                                   modified = substr(data[[i]]$modification, 2, 
                                                                                     nchar(data[[i]]$modification) - 1), 
@@ -1046,7 +1048,7 @@ gPSMvalidator <-
                                         
                                         
                                         
-                                        fi <- fragmentIon(sequence = data[[i]]$peptideSequence, 
+                                        fi <- protViz::fragmentIon(sequence = data[[i]]$peptideSequence, 
                                                           FUN = defaultIons, 
                                                           modified = substr(data[[i]]$modification, 2, 
                                                                             nchar(data[[i]]$modification) - 1), 
@@ -1203,7 +1205,6 @@ gPSMvalidator <-
 #  Function 21. #default ions
 ##############################################################################
 
-#' @export
 defaultIons <-
         function (b, y)
         {
@@ -1221,7 +1222,6 @@ defaultIons <-
 # and associate it with the SIC peaks file
 ###############################################################################
 
-#' @export
 Read.RQ <- function (input="Output/quantitation_Chym1_ELUTE_211.csv",
                      dir="quantitation_Chym1_ELUTE") {
       
@@ -1258,7 +1258,7 @@ return(RQ)
 #   Function. 23. Read.SICData   Read in SIC data 
 ##############################################################################
 
-#' @export
+
 Read.SICData <- function (dir="quantitation_Chym1_ELUTE") {
         
 read.dat <- function(file="ljz_20131022_MR_Chym1_ELUTE.mzML.sic.
@@ -1298,10 +1298,9 @@ title.identified <- RQ$title
 #   24. #peakplot
 ##############################################################################
 
-#' @export
 peakplot <- 
         function (peptideSequence, spec, FUN = defaultIons, 
-                  fi = fragmentIon(peptideSequence, FUN = FUN)[[1]], 
+                  fi = protViz::fragmentIon(peptideSequence, FUN = FUN)[[1]], 
                   main = NULL, 
                   sub = NULL, 
                   xlim = range(spec$mZ, na.rm = TRUE), 
@@ -1368,7 +1367,6 @@ peakplot <-
 # and associate it with the SIC peaks file
 ###############################################################################
 
-#' @export
 Read.RQ <- function (input,
                      dir="RQ/") {
   
@@ -1410,7 +1408,7 @@ Read.RQ <- function (input,
 #   Function. 26. Read.SICData   Read in SIC data 
 ##############################################################################
 
-#' @export
+
 Read.SICData <- function (dir="quantitation_Chym1_ELUTE", Asn=211) {
         
         read.dat <- function(file="ljz_20131022_MR_Chym1_ELUTE.mzML.sic.
@@ -1446,7 +1444,6 @@ Read.SICData <- function (dir="quantitation_Chym1_ELUTE", Asn=211) {
 #   Function. 27. RQ of glycoforms
 ##############################################################################
 
-#' @export
 glycoRQ <- function(RQ, rtTable, dir, rt.min.minus, rt.min.plus) {
         
         rr <- numeric()
@@ -1495,8 +1492,6 @@ glycoRQ <- function(RQ, rtTable, dir, rt.min.minus, rt.min.plus) {
 ################################################################################
 # 28. pGlycoFilter
 ################################################################################
-
-#' @export
 pGlycoFilter <- function(structure, data=NULL) {
         
         varname <- as.character(substitute(structure))
@@ -1590,7 +1585,6 @@ pGlycoFilter <- function(structure, data=NULL) {
 #       list of MS2 data names
 ##############################################################################
 
-#' @export
 Read.GlycoMod <- function (input=pGlycoFilter_output, 
                            ChainSaw,
                            spectrum.table=spectrum.table, 
@@ -1771,10 +1765,10 @@ Read.GlycoMod <- function (input=pGlycoFilter_output,
 # ## 30. psm
 ##############################################################################
 
-#' @export
+
 psm <- 
         function (sequence, spec, FUN = defaultIon, plot = FALSE, 
-                  fi = fragmentIon(sequence, 
+                  fi = protViz::fragmentIon(sequence, 
                                    FUN = FUN)[[1]], fragmentIonError = 0.02) 
         {
                 n <- nchar(sequence)
@@ -1788,7 +1782,7 @@ psm <-
                 }
                 out <- .C("__findNN_", nbyion = as.integer(length(by.mZ)), 
                           nmZ = as.integer(length(spec$mZ)), byion = as.double(by.mZ), 
-                          mZ = as.double(spec$mZ), NN = as.integer(rep(-1, length(by.mZ))), PACKAGE="protViz")
+                          mZ = as.double(spec$mZ), NN = as.integer(rep(-1, length(by.mZ))))
                 mZ.error <- spec$mZ[out$NN + 1] - by.mZ
                 if (plot == TRUE) {
                         plot(mZ.error[mZ.error.idx <- order(mZ.error)], 
@@ -1813,8 +1807,6 @@ psm <-
 #   Function 31. Restrict the IDPdb from glycoMod search to the retention time
 # determined and recorded in table 2
 ##############################################################################
-
-#' @export
 rt.restrict <- function(IDPdb, rtTable, rt.min.minus, rt.min.plus) {
   
   rr <- numeric()
@@ -1854,7 +1846,6 @@ rt.restrict <- function(IDPdb, rtTable, rt.min.minus, rt.min.plus) {
 # function 32. retentionTimeTable
 ######################################################################################
 
-#' @export
 retentionTimeTable <- function(dat) {
   
   t2S <- unique(dat$table2Sequence)
@@ -1931,8 +1922,6 @@ retentionTimeTable <- function(dat) {
 ############
 # 33. Read.RQinput Make RQ_input table
 ##########
-
-#' @export
 Read.RQinput <- function (gPSMs.ALL) {
         
         
@@ -1952,3 +1941,91 @@ Read.RQinput <- function (gPSMs.ALL) {
         
 }
 
+########################
+## glycoChange function
+#####
+
+glycoChange <- function(fasta)
+{
+        
+        
+        glycoFasta <- lapply(fasta, function(x){gsub("NAS",
+                                                     "nAS",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NCS",
+                                                          "nCS",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NDS",
+                                                          "nDS",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NES",
+                                                          "nES",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NFS",
+                                                          "nFS",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NGS",
+                                                          "nGS",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NHS",
+                                                          "nHS",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NIS",
+                                                          "nIS",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NKS",
+                                                          "nKS",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NLS",
+                                                          "nLS",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NMS",
+                                                          "nMS",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NNS",
+                                                          "nNS",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NQS",
+                                                          "nQS",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NRS",
+                                                          "nRS",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NSS",
+                                                          "nSS",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NTS",
+                                                          "nTS",x,fixed=F)})	
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NVS",
+                                                          "nVS",x,fixed=F)})	
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NYS",
+                                                          "nYS",x,fixed=F)})	
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NWS",
+                                                          "nWS",x,fixed=F)})	
+        
+        
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NAT",
+                                                          "nAT",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NCT",
+                                                          "nCT",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NDT",
+                                                          "nDT",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NET",
+                                                          "nET",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NFT",
+                                                          "nFT",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NGT",
+                                                          "nGT",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NHT",
+                                                          "nHT",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NIT",
+                                                          "nIT",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NKT",
+                                                          "nKT",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NLT",
+                                                          "nLT",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NMT",
+                                                          "nMT",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NNT",
+                                                          "nNT",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NQT",
+                                                          "nQT",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NRT",
+                                                          "nRT",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NST",
+                                                          "nST",x,fixed=F)})
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NTT",
+                                                          "nTT",x,fixed=F)})	
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NVT",
+                                                          "nVT",x,fixed=F)})	
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NYT",
+                                                          "nYT",x,fixed=F)})	
+        glycoFasta <- lapply(glycoFasta, function(x){gsub("NWT",
+                                                          "nWT",x,fixed=F)})	
+        return(glycoFasta)
+}
