@@ -654,7 +654,7 @@ gPSMvalidator <-
         
         function (data, modification, modificationName, mZmarkerIons, 
                   minMarkerIons = 2, itol_ppm = 15, minMarkerIntensityRatio = 2, 
-                  PEAKPLOT=TRUE, validate=FALSE) 
+                  peakplot0.02=TRUE, validate=FALSE) 
         {
                 
                 query.idx <- 1:length(data)
@@ -871,7 +871,7 @@ gPSMvalidator <-
                                                 
                                                 fi.by <- as.data.frame(cbind(b = fi[[1]]$b, y = fi[[1]]$y))
                                                 
-                                                check<- peakplot(peptideSequence=data[[i]]$peptideSequence, spec = data[[i]], 
+                                                check<- peakplot0.02(peptideSequence=data[[i]]$peptideSequence, spec = data[[i]], 
                                                                  fi = fi.by, ion.axes = F, 
                                                                  main = list(paste(data[[i]]$sampleName, 
                                                                                    data[[i]]$sequence, 
@@ -1056,7 +1056,7 @@ gPSMvalidator <-
                                         
                                         fi.by <- as.data.frame(cbind(b = fi[[1]]$b, y = fi[[1]]$y))
                                         
-                                        check<- peakplot(data[[i]]$peptideSequence, spec = data[[i]], 
+                                        check<- peakplot0.02(data[[i]]$peptideSequence, spec = data[[i]], 
                                                          fi = fi.by, ion.axes = F, 
                                                          main = list(paste(data[[i]]$sampleName, 
                                                                            data[[i]]$sequence, 
@@ -1295,10 +1295,10 @@ title.identified <- RQ$title
 
 
 ###############################################################################
-#   24. #peakplot
+#   24. #peakplot0.02
 ##############################################################################
 
-peakplot <- 
+peakplot0.02 <- 
         function (peptideSequence, spec, FUN = defaultIons, 
                   fi = protViz::fragmentIon(peptideSequence, FUN = FUN)[[1]], 
                   main = NULL, 
@@ -1309,7 +1309,7 @@ peakplot <-
                   pattern.xyz = "[xyz].*", ion.axes = TRUE) 
         {
                 n <- nchar(peptideSequence)
-                m <- psm(peptideSequence, spec, FUN, fi = fi, plot = FALSE)
+                m <- psm0.02(peptideSequence, spec, FUN, fi = fi, plot = FALSE)
                 max.intensity <- max(spec$intensity, na.rm = TRUE)
                 yMax <- 1 * max.intensity
                 
@@ -1762,11 +1762,11 @@ Read.GlycoMod <- function (input=pGlycoFilter_output,
 }
 
 ##############################################################################
-# ## 30. psm
+# ## 30. psm0.02
 ##############################################################################
 
 
-psm <- 
+psm0.02 <- 
         function (sequence, spec, FUN = defaultIon, plot = FALSE, 
                   fi = protViz::fragmentIon(sequence, 
                                    FUN = FUN)[[1]], fragmentIonError = 0.02) 
