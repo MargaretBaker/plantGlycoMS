@@ -1,11 +1,11 @@
 Package: plantGlycoMS
 Type: Package
-Title: A package for processing plant glycosylation MS data
+Title: A Package for Processing Plant Glycosylation MS Data
 Version: 0.1
 Date: 2016-01-01
 Author: Margaret Baker
 Maintainer: Margaret Baker <mruzicka@hawaii.edu>
-Description: A package for processing plant glycosylation MS data.
+Description: R functions and workflows for analyzing plant glycopeptide mass spectrometry data.
 License: GPL-2
 LazyLoad: yes
 Imports:
