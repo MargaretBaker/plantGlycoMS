@@ -1,10 +1,11 @@
-################################################################################
-#   Function 1. Add in the spectrum table and calculate the MonoPrecursorMass
-#
-# input is the spectrum table obtained from an msaccess search (proteowizard)
-# this function is needed to calculate the monoisotopic precursor mass from the
-# precursor mz
-################################################################################
+#' A function to calculate monoisotopic precursor mass
+#'
+#' this function calculates the monoisotopic precursor mass from then precursor mz
+#' @param input a csv file with one column named precursorMZ
+#' @keywords calculate
+#' @export
+#' @examples
+#' spectrumTable()
 
 spectrumTable <- function (input) {
         
@@ -16,22 +17,25 @@ spectrumTable$MonoPrecursorMass <- (spectrumTable$precursorMZ *
         
         return(spectrumTable)
         
-        
 }
 
-
-###############################################################################################################
-# Function 2: glycoChainSaw
-# this function takes in results from chainsaw with glycosylation site labeled (digest.n)
-# and unlabled (digest.N). It combines these and optionally adds the mass for carbamidomethylation
-# the output is a dataframe that has a column identifying the glycosylation site in the sequence with "n"
-# it can optionally return a dataframe containing only data for peptide with glycosylation sites
-###############################################################################################################
+#' A function to modify a chainsaw in silico digest
+#'
+#' this function adds the mass for carbamidomethylation and methionine oxidation and filters for glycopeptides
+#' @param digest.N a chainsaw in silico digest with all glycosylation sites having a capital n (N)
+#' @param digest.n a chainsaw in silico digest with all glycosylation sites having a lower case n (n)
+#' @param carbamidomethylation 57 Da is added to the peptide mass for every cysteine present, default=TRUE
+#' @param methionineOxidation 16 Da is added to the peptide mass for every methionine present, and a new row is added to the table so that every methionine containing peptide has a value for oxidized and not oxidized, default=TRUE
+#' @param glycoOnly return a dataframe containing only data for peptide with glycosylation sites, default=TRUE
+#' @keywords digest
+#' @export
+#' @examples
+#' glycoChainSaw()
 
 glycoChainSaw <- function(digest.N, digest.n, carbamidomethylation=TRUE, methionineOxidation=TRUE, glycoOnly =TRUE) {
   
   
-  names(digest.n) <- c("n.sequence", "protein", "mass"  ,  "missedCleavages",  "specificity",     
+  names(digest.n) <- c("n.sequence", "protein", "mass",  "missedCleavages",  "specificity",     
                        "nTerminusIsSpecific" ,"cTerminusIsSpecific" )
   
   digest.n$sequence <- gsub("n", "N", digest.n$n.sequence)
@@ -87,10 +91,14 @@ glycoChainSaw <- function(digest.N, digest.n, carbamidomethylation=TRUE, methion
   
   return(digest.Nn)
 }
-################################################################################
-#  3. GlycoMod Results (filtered) - PreferredDeltaMasses
-# input for this function is the output of pGlycoFilter
-################################################################################
+
+#' A function to add the glycosylation motif for a MyriMatch database search config
+#'
+#' this function adds N!{P}[ST] * in front of a mass value
+#' @param input a vector of dynamic modification masses
+#' @keywords import data
+#' @export
+
 
 PreferredDeltaMasses <- function (input)
 {
@@ -101,13 +109,16 @@ PreferredDeltaMasses <- function (input)
 
 }
 
-
-##############################################################################
-#     Function 4. Read in data 
-# input: table of PSMs from IDPicker
-# ChainSaw: table of peptides from digest software like chainsaw
-# dir: a directory containing all of the MS2 data files
-##############################################################################
+#' A function to import IDPicker results
+#'
+#' This function imports IDPicker results and calculates relevant values.
+#' @param IDPdb a data.frame containing peptide spectrum matches
+#' @param ChainSaw a data.frame of insilico digest results (see glycoChainSaw)
+#' @param dir a directory containing MS2 binary data
+#' @keywords import data
+#' @export
+#' @examples
+#' Read.IDPdb()
 
 Read.IDPdb <- function (IDPdb, ChainSaw,dir) {
         
@@ -321,10 +332,15 @@ Read.IDPdb <- function (IDPdb, ChainSaw,dir) {
         
 }
 
-
-###########################################################
-#        Function 5. Read in MS2 data with IDPdb
-###########################################################
+#' A function to import MS2 binary data generated with msaccess (ProteoWizard).
+#'
+#' this function imports MS2 binary data
+#' @param IDPdb a data.frame containing peptide spectrum matches
+#' @param dir name of the directory containing the MS2 binary data
+#' @keywords import data
+#' @export
+#' @examples
+#' Read.MS2Data()
 
 Read.MS2Data <- function (IDPdb, dir="convertedData/MS2Data_Chym1_ELUTE") {
         
@@ -351,11 +367,17 @@ read.dat <- function(file="ljz_20131022_MR_Chym2_ELUTE.mzML.binary.sn1801.txt")
         return(MS2Data)
 }
 
-###############################################################################
-#  6. Calculate the Y1, Y0, Y2, and Y3 masses and save each to a list
-# These ions are specific to a particular glycopeptide and are key to 
-# validating the gPSMs.
-##############################################################################
+#' A function to calculate Y-ions
+#'
+#' this function calculates Y-ions
+#' @param IDPdb a data.frame containing MonoisotopicPeptideMasses and corresponding MonoisotopicY1mass, and the charge state
+#' @keywords calculate
+#' @export
+#' @examples MonoisotopicPeptideMass <- c(1000, 2000, 3000, 4000)
+#' MonoisotopicY1mass <- c(1203.079, 2203.079, 3203.079, 4203.079)
+#' charge <- c(2,5,3,4)
+#' IDPdb <- data.frame(MonoisotopicY1mass,MonoisotopicPeptideMass, charge)
+#' Ions <- calculateIons(IDPdb)
 
 calculateIons <- function (IDPdb) {
         
@@ -408,11 +430,16 @@ Ions[[ii]]$Y3FX <-
 return(Ions)
 
 }
-#########################################
-#        Function 7. Calculate the Y1 masses
-#########################################
 
-# identify the Y1 (MonoisotopicY1mass) peak.
+#' A function to calculate the Y1-ions
+#'
+#' this function calculates the m/z value of a Y1-ion
+#' @param MonoisotopicY1mass numeric value
+#' @param charge numeric value
+#' @keywords calculate
+#' @export
+#' @examples 
+#' find_Y1(1000,4)
 
 find_Y1 <- function(MonoisotopicY1mass, charge ) {
         
@@ -422,10 +449,15 @@ find_Y1 <- function(MonoisotopicY1mass, charge ) {
         
 }
 
-#########################################
-#        Function 8. Calculate the Y1Mox masses, ie the mass if lost methane sulfenic acid
-#########################################
-
+#' A function to calculate the neutral loss of methane sulfenic acid from a Y-1 ion
+#'
+#' this function calculates the m/z value of the neutral loss of methane sulfenic acid from a Y-1 ion
+#' @param MonoisotopicY1mass numeric value
+#' @param charge numeric value
+#' @keywords calculate
+#' @export
+#' @examples 
+#' find_Y1Mox(1000,4)
 
 find_Y1Mox <- function(MonoisotopicY1mass, charge ) {
         
@@ -435,10 +467,16 @@ find_Y1Mox <- function(MonoisotopicY1mass, charge ) {
         return(Y1Mox)
         
 }
-#########################################
-#        Function 9. Calculate the Y1Ca masses, ie the mass if lost carbamidomethyl
-#########################################
 
+#' A function to calculate the neutral loss of a carbamidomethyl group from a Y-1 ion
+#'
+#' this function calculates the m/z value of the neutral loss of a carbamidomethyl group from a Y-1 ion
+#' @param MonoisotopicY1mass numeric value
+#' @param charge numeric value
+#' @keywords calculate
+#' @export
+#' @examples 
+#' find_Y1Ca(1000,4)
 
 find_Y1Ca <- function(MonoisotopicY1mass, charge ) {
         
@@ -449,12 +487,15 @@ find_Y1Ca <- function(MonoisotopicY1mass, charge ) {
         
 }
 
-
-#########################################
-#        Function 10. Calculate the Peptide masses 
-#########################################
-
-# identify the Peptide masses (of glycopeptides that lost the whole glycan)
+#' A function to calculate the Y0-ions
+#'
+#' this function calculates the m/z value of a Y0-ion
+#' @param MonoisotopicPeptideMass numeric value
+#' @param charge numeric value
+#' @keywords calculate
+#' @export
+#' @examples 
+#' find_Y0(1000,4)
 
 find_PepPlus <- function(MonoisotopicPeptideMass, charge ) {
         
@@ -464,11 +505,15 @@ find_PepPlus <- function(MonoisotopicPeptideMass, charge ) {
         
 }
 
-#########################################
-#        Function 11. Calculate the Peptide masses with loss of ammonia
-#########################################
-
-# identify the Peptide masses (of glycopeptides that lost the whole glycan)
+#' A function to calculate the neutral loss of ammonia from a Y0- ion
+#'
+#' this function calculates the m/z value of the neutral loss of ammonia from a Y0- ion
+#' @param MonoisotopicPeptideMass numeric value
+#' @param charge numeric value
+#' @keywords calculate
+#' @export
+#' @examples
+#' find_Y0NH3(1000,4)
 
 find_Y0NH3 <- function(MonoisotopicPeptideMass, charge ) {
         
@@ -479,10 +524,15 @@ find_Y0NH3 <- function(MonoisotopicPeptideMass, charge ) {
         
 }
 
-#########################################
-#        Function 12. Calculate the Y1F masses, ie the mass if core fucose present
-#########################################
-
+#' A function to calculate the Y1- plus fucose ion
+#'
+#' this function calculates the m/z value of the Y1 plus fucose ion
+#' @param MonoisotopicY1mass numeric value
+#' @param charge numeric value
+#' @keywords calculate
+#' @export
+#' @examples 
+#' find_Y1F(1000,4)
 
 find_Y1F <- function(MonoisotopicY1mass, charge ) {
         
@@ -493,10 +543,15 @@ find_Y1F <- function(MonoisotopicY1mass, charge ) {
         
 }
 
-#########################################
-#        Function 13. Calculate the Y1F masses, ie the mass if core fucose present
-#########################################
-
+#' A function to calculate the Y2- plus fucose ion
+#'
+#' this function calculates the m/z value of the Y2 plus fucose ion
+#' @param MonoisotopicY1mass numeric value
+#' @param charge numeric value
+#' @keywords calculate
+#' @export
+#' @examples 
+#' find_Y2F(1000,4)
 
 find_Y2F <- function(MonoisotopicY1mass, charge ) {
         
@@ -507,10 +562,15 @@ find_Y2F <- function(MonoisotopicY1mass, charge ) {
         
 }
 
-#########################################
-#        Function 14. Calculate the Y1F masses, ie the mass if core fucose present
-#########################################
-
+#' A function to calculate the Y3- plus fucose ion
+#'
+#' this function calculates the m/z value of the Y3 plus fucose ion
+#' @param MonoisotopicY1mass numeric value
+#' @param charge numeric value
+#' @keywords calculate
+#' @export
+#' @examples 
+#' find_Y3F(1000,4)
 
 find_Y3F <- function(MonoisotopicY1mass, charge ) {
         
@@ -521,10 +581,15 @@ find_Y3F <- function(MonoisotopicY1mass, charge ) {
         
 }
 
-#########################################
-#        Function 15. Calculate the Y1F masses, ie the mass if core fucose present
-#########################################
-
+#' A function to calculate the Y3- plus fucose and xylose ion
+#'
+#' this function calculates the m/z value of the Y1 plus fucose and xylose ion
+#' @param MonoisotopicY1mass numeric value
+#' @param charge numeric value
+#' @keywords calculate
+#' @export
+#' @examples 
+#' find_Y3FX(1000,4)
 
 find_Y3FX <- function(MonoisotopicY1mass, charge ) {
         
@@ -535,11 +600,15 @@ find_Y3FX <- function(MonoisotopicY1mass, charge ) {
         
 }
 
-
-#########################################
-#        Function 16. Calculate the Y2 masses, ie the mass if core fucose present
-#########################################
-
+#' A function to calculate the Y2-ion
+#'
+#' this function calculates the m/z value of the Y2-ion
+#' @param MonoisotopicY1mass numeric value
+#' @param charge numeric value
+#' @keywords calculate
+#' @export
+#' @examples 
+#' find_Y2(1000,4)
 
 find_Y2 <- function(MonoisotopicY1mass, charge ) {
         
@@ -550,10 +619,15 @@ find_Y2 <- function(MonoisotopicY1mass, charge ) {
         
 }
 
-#########################################
-#        Function 17. Calculate the Y3 masses, ie the mass if core fucose present
-#########################################
-
+#' A function to calculate the Y3-ion
+#'
+#' this function calculates the m/z value of the Y3-ion
+#' @param MonoisotopicY1mass numeric value
+#' @param charge numeric value
+#' @keywords calculate
+#' @export 
+#' @examples 
+#' find_Y3(1000,4)
 
 find_Y3 <- function(MonoisotopicY1mass, charge ) {
         
@@ -564,10 +638,15 @@ find_Y3 <- function(MonoisotopicY1mass, charge ) {
         
 }
 
-#########################################
-#        Function 18. Calculate the Y3X masses, ie the mass if core xylose present
-#########################################
-
+#' A function to calculate the Y3 plus xylose-ion
+#'
+#' this function calculates the m/z value of the Y3 plus xylose-ion
+#' @param MonoisotopicY1mass numeric value
+#' @param charge numeric value
+#' @keywords calculate
+#' @export 
+#' @examples 
+#' find_Y3X(1000,4)
 
 find_Y3X <- function(MonoisotopicY1mass, charge ) {
         
@@ -578,9 +657,18 @@ find_Y3X <- function(MonoisotopicY1mass, charge ) {
         
 }
 
-###############################################################################
-#  19. Compile all of the data into one list
-##############################################################################
+#' A function to compile data for the 'data' argument in plantGlycoMS
+#'
+#' this function compiles data for the 'data' argument in plantGlycoMS
+#' @param analysis a character string with the name of the analysis, defaults to "analysis"
+#' @param sampleName a character string with the name of the sample, defaults to "results"
+#' @param IDPdb a data.frame containing the peptide spectrum matches, defaults to IDPdb
+#' @param MS2Data a list of MS2 binary text files, defaults to MS2Data
+#' @param Ions, a list of ion m/z values for each peptide spectrum match, defaults to Ions
+#' @keywords compile
+#' @export
+#' @examples 
+#' compileData()
 
 compileData <- function (analysis="analysis", sampleName="results", 
                          IDPdb=IDPdb, MS2Data=MS2Data, Ions=Ions) {
@@ -645,16 +733,29 @@ compileData <- function (analysis="analysis", sampleName="results",
         
 }
 
-#################################################################
-#        Function 20. gPSMvalidation 
-# validation and spectrum annotation
-#################################################################
+#' A function to validate and annotate plant glycopeptide-spectrum matches
+#'
+#' this function validates and annotates plant glycopeptide-spectrum matches
+#' @param data a list compiled with compileData function
+#' @param modification vector containing the modification mass
+#' @param modificationName a character vector containing the name of the modification
+#' @param mZmarkerIons a vector containing the mass values of the oxonium ions
+#' @param minMarkerIons the minimum number of oxonium ions required for a match to be valid, default is 2
+#' @param itol_ppm the MS ion tolerance in ppm, default is 15
+#' @param minMarkerIntensityRatio the minimum intensity ratio of marker ions, default is 2
+#' @param peakplot02 if true, plots will be generated, default is TRUE
+#' @param validate if true, gPSMs will be validated, if false, all will be plotted, default is FALSE
+#' @keywords validation
+#' @export
+#' @examples 
+#' gPSMvalidator()
+
 
 gPSMvalidator <-
         
         function (data, modification, modificationName, mZmarkerIons, 
                   minMarkerIons = 2, itol_ppm = 15, minMarkerIntensityRatio = 2, 
-                  peakplot=TRUE, validate=FALSE) 
+                  peakplot02=TRUE, validate=FALSE) 
         {
                 
                 query.idx <- 1:length(data)
@@ -871,7 +972,7 @@ gPSMvalidator <-
                                                 
                                                 fi.by <- as.data.frame(cbind(b = fi[[1]]$b, y = fi[[1]]$y))
                                                 
-                                                check<- peakplot(peptideSequence=data[[i]]$peptideSequence, spec = data[[i]], 
+                                                check<- peakplot02(peptideSequence=data[[i]]$peptideSequence, spec = data[[i]], 
                                                                  fi = fi.by, ion.axes = F, 
                                                                  main = list(paste(data[[i]]$sampleName, 
                                                                                    data[[i]]$sequence, 
@@ -1056,7 +1157,7 @@ gPSMvalidator <-
                                         
                                         fi.by <- as.data.frame(cbind(b = fi[[1]]$b, y = fi[[1]]$y))
                                         
-                                        check<- peakplot(data[[i]]$peptideSequence, spec = data[[i]], 
+                                        check<- peakplot02(data[[i]]$peptideSequence, spec = data[[i]], 
                                                          fi = fi.by, ion.axes = F, 
                                                          main = list(paste(data[[i]]$sampleName, 
                                                                            data[[i]]$sequence, 
@@ -1200,10 +1301,15 @@ gPSMvalidator <-
                 return(as.data.frame(rr, stringsAsFactors=FALSE))
         }
 
-
-##############################################################################
-#  Function 21. #default ions
-##############################################################################
+#' A function to define default ion values
+#'
+#' this function defines default ion values
+#' @param b mass of a b-ion
+#' @param y mass of a y-ion
+#' @keywords protViz
+#' @export
+#' @examples 
+#' defaultIons()
 
 defaultIons <-
         function (b, y)
@@ -1217,88 +1323,27 @@ defaultIons <-
         }
 
 
-##############################################################################
-#   Function 22. Read.RQ. Read in quantitation information 
-# and associate it with the SIC peaks file
-###############################################################################
 
-Read.RQ <- function (input="Output/quantitation_Chym1_ELUTE_211.csv",
-                     dir="quantitation_Chym1_ELUTE") {
-      
-        
-RQ <- read.csv(file=input, header=TRUE)
-        
-# Make a data frame 'SIC.all' with columns 'title' and 'exact.precursor.mz'; 
-# it is a list of the SIC files and the exact mz
-        
-title <- list.files(dir)
-peaks <- grep("peaks", title)
-        
-data <- title[peaks]
-title <- title[peaks]
-        
-# change: chr "ljz_20131022_MR_Chym1_HILIC_MS2.mzML.binary.sn1830.txt" 
-#to: num  10011
-        
-data <- strsplit(data, split="sic.")
-data <- sapply(data, function(x) x[2])
-data <- strsplit(data, split=".peaks")
-data <- sapply(data, function(x) x[1])
-exact.precursor.mz <- as.numeric(data)
-        
-# this is the title and scan number. 
-#data will be filled in after merging with IDPdb
-SIC.all <- data.frame(exact.precursor.mz, title) 
-RQ <- merge(  x = SIC.all, y = RQ,  by = "exact.precursor.mz", all.y = TRUE)
-RQ$title <- as.character(RQ$title)
-return(RQ)
-}
+#' A function to plot MS data
+#'
+#' this function plots MS data
+#' @param peptideSequence a peptide sequence
+#' @param spec a spectrum
+#' @param FUN a function to calculate ions, default is defaultIons
+#' @param fi a fragment ion function, default is protViz::fragmentIon(peptideSequence, FUN = FUN)[[1]] 
+#' @param main the main title of a plot, default is NULL
+#' @param sub the subtitle of a plot, default is NULL
+#' @param xlim the limits of the x axis, default is range(spec$mZ, na.rm = TRUE)
+#' @param the limits of the y axis, default is ylim = range(spec$intensity, na.rm = TRUE)
+#' @param itol the fragment ion mass tolerance in delta mz, default is 0.02
+#' @param pattern.abc the abc pattern, default is "[abc].*"
+#' @param pattern.xyz the xyz pattern, default is "[xyz].*", ion.axes = TRUE)
+#' @keywords protViz
+#' @export
+#' @examples 
+#' peakplot02()
 
-##############################################################################
-#   Function. 23. Read.SICData   Read in SIC data 
-##############################################################################
-
-
-Read.SICData <- function (dir="quantitation_Chym1_ELUTE") {
-        
-read.dat <- function(file="ljz_20131022_MR_Chym1_ELUTE.mzML.sic.
-                     519.5880.peaks.csv") 
-        {                		
-                
-                dat <- read.csv(paste(dir, "/", file, sep=""), skip=1)
-                dat <- dat[c("rt", "sumIntensity","peakMZ")]
-                dat$rt.min <- dat$rt/60
-                
-                tt <- dat$peakMZ
-                tt <- as.character(tt)
-                tt <- strsplit(tt, split=".", fixed=T)
-                tag <- sapply(tt, function(x) x[1])
-                dat$tag <- as.numeric(tag)
-                
-                return(dat)
-        }
-        
-        # Make a list 'MS2Data' containing all MS2 binary data
-# these are all of the titles matching ids in RQ        
-title.identified <- RQ$title							
-        
-        SICData <- vector( mode="list", length=length(title.identified))
-        SICData <- lapply( title.identified, read.dat )
-        names(SICData) <- title.identified
-        
-        
-        return(SICData)
-}
-
-
-
-
-
-###############################################################################
-#   24. #peakplot
-##############################################################################
-
-peakplot <- 
+peakplot02 <- 
         function (peptideSequence, spec, FUN = defaultIons, 
                   fi = protViz::fragmentIon(peptideSequence, FUN = FUN)[[1]], 
                   main = NULL, 
@@ -1309,7 +1354,7 @@ peakplot <-
                   pattern.xyz = "[xyz].*", ion.axes = TRUE) 
         {
                 n <- nchar(peptideSequence)
-                m <- psm(peptideSequence, spec, FUN, fi = fi, plot = FALSE)
+                m <- psm02(peptideSequence, spec, FUN, fi = fi, plot = FALSE)
                 max.intensity <- max(spec$intensity, na.rm = TRUE)
                 yMax <- 1 * max.intensity
                 
@@ -1360,12 +1405,16 @@ peakplot <-
                 return(m)
         }
 
-
-
-##############################################################################
-#   Function 25. Read.RQ. Read in quantitation information 
-# and associate it with the SIC peaks file
-###############################################################################
+#' A function to import RQ data
+#'
+#' this function is used to import RQ data and associate it with SIC data
+#' @param input the data
+#' @param dir the directory with the SIC data
+#' @keywords relative quantitation
+#' @keywords import
+#' @export
+#' @examples 
+#' Read.RQ()
 
 Read.RQ <- function (input,
                      dir="RQ/") {
@@ -1404,12 +1453,18 @@ Read.RQ <- function (input,
   return(RQ2)
 }
 
-##############################################################################
-#   Function. 26. Read.SICData   Read in SIC data 
-##############################################################################
+#' A function to import SIC data
+#'
+#' this function is used to import with SIC data generated with msaccess (ProteoWizard)
+#' @param dir the directory with SIC data
+#' @param Asn later it will be a way to designate different glycoform series
+#' @keywords relative quantitation
+#' @keywords import
+#' @export
+#' @examples 
+#' Read.SICData()
 
-
-Read.SICData <- function (dir="quantitation_Chym1_ELUTE", Asn=211) {
+Read.SICData <- function (dir="quantitation_Chym1_ELUTE", Asn) {
         
         read.dat <- function(file="ljz_20131022_MR_Chym1_ELUTE.mzML.sic.
                              519.5880.peaks.csv") 
@@ -1440,9 +1495,18 @@ Read.SICData <- function (dir="quantitation_Chym1_ELUTE", Asn=211) {
         return(SICData)
 }
 
-##############################################################################
-#   Function. 27. RQ of glycoforms
-##############################################################################
+#' A function to estimate relative abunance of glycoforms
+#'
+#' this function estimates relative abunance of glycoforms
+#' @param RQ a data.frame
+#' @param rtTable a data.frame with retention time information
+#' @param dir a directory with SIC data
+#' @param rt.min.minus retention time minus
+#' @param rt.min.plus retention time plus
+#' @keywords relative quantitation
+#' @export
+#' @examples 
+#' glycoRQ()
 
 glycoRQ <- function(RQ, rtTable, dir, rt.min.minus, rt.min.plus) {
         
@@ -1489,9 +1553,17 @@ glycoRQ <- function(RQ, rtTable, dir, rt.min.minus, rt.min.plus) {
         return(as.data.frame(rr))
 }
 
-################################################################################
-# 28. pGlycoFilter
-################################################################################
+#' A function to validate a glycan composition prediction
+#'
+#' this function uses rules based on the plant N-glycan biosynthesis pathway to test if 
+#' a predicted glycan composition is biologically possible
+#' @param structure the glycan composition
+#' @param data a csv file from the GlycoMod search
+#' @keywords glycan
+#' @export
+#' @examples 
+#' pGlycoFilter()
+
 pGlycoFilter <- function(structure, data=NULL) {
         
         varname <- as.character(substitute(structure))
@@ -1580,12 +1652,19 @@ pGlycoFilter <- function(structure, data=NULL) {
         }
 }
 
-##############################################################################
-#   Function 29. Read in data from glycomod search (IDPdb, in silico digest, 
-#       list of MS2 data names
-##############################################################################
+#' A function to import GlycoMod data
+#'
+#' this function is for importing GlycoMod data
+#' @param input glycopeptide identifications from GlycoMod
+#' @param ChainSaw an in silico digest
+#' @param spectrum.table a summary table of MS data
+#' @param dir a directory with MS2 binary data
+#' @keywords import
+#' @export
+#' @examples 
+#' Read.GlycoMod()
 
-Read.GlycoMod <- function (input=pGlycoFilter_output, 
+Read.GlycoMod <- function (input, 
                            ChainSaw,
                            spectrum.table=spectrum.table, 
                            dir="MS2Data") {
@@ -1761,12 +1840,22 @@ Read.GlycoMod <- function (input=pGlycoFilter_output,
         
 }
 
-##############################################################################
-# ## 30. psm
-##############################################################################
+#' A function to match peptides to spectra
+#'
+#' this function plots MS data
+#' @param sequence the peptide sequence
+#' @param spec a spectrum
+#' @param FUN a function for calculating ions, default is defaultIon
+#' @param plot should the psm be plotted, default is FALSE
+#' @param fi how are fragment ions calculated, default is protViz::fragmentIon(sequence, FUN = FUN)[[1]]
+#' @param fragmentIonError the mass error for fragment ions in mz, default is 0.02
+#' @keywords protViz
+#' @export
+#' @examples 
+#' psm02()
 
 
-psm <- 
+psm02 <- 
         function (sequence, spec, FUN = defaultIon, plot = FALSE, 
                   fi = protViz::fragmentIon(sequence, 
                                    FUN = FUN)[[1]], fragmentIonError = 0.02) 
@@ -1780,10 +1869,8 @@ psm <-
                         by.mZ <- c(by.mZ, fi[, i])
                         by.label <- c(by.label, paste(fi.names[i], 1:n, sep = ""))
                 }
-                out <- .C("__findNN_", nbyion = as.integer(length(by.mZ)), 
-                          nmZ = as.integer(length(spec$mZ)), byion = as.double(by.mZ), 
-                          mZ = as.double(spec$mZ), NN = as.integer(rep(-1, length(by.mZ))))
-                mZ.error <- spec$mZ[out$NN + 1] - by.mZ
+                NN <- protViz::findNN_(q = by.mZ, vec = spec$mZ)
+                mZ.error <- spec$mZ[NN] - by.mZ
                 if (plot == TRUE) {
                         plot(mZ.error[mZ.error.idx <- order(mZ.error)], 
                              ylim = c(-5 * fragmentIonError, 5 * fragmentIonError), 
@@ -1799,14 +1886,22 @@ psm <-
                                                                            cover)), sep = "="))
                 }
                 return(list(mZ.Da.error = mZ.error, mZ.ppm.error = 1e+06 * 
-                                    mZ.error/by.mZ, idx = out$NN + 1, label = by.label, score = -1, 
+                                    mZ.error/by.mZ, idx = NN, label = by.label, score = -1, 
                             sequence = sequence, fragmentIon = fi))
         }
 
-##############################################################################
-#   Function 31. Restrict the IDPdb from glycoMod search to the retention time
-# determined and recorded in table 2
-##############################################################################
+#' A function to filter gPSMs by retention time
+#'
+#' this function filters gPSMs by retention time
+#' @param IDPdb a table with peptide spectrum match information generated with IDPicker
+#' @param rtTable a table with information about identified glycopeptides and their retention times
+#' @param rt.min.minus amount of minutes to subtract from the retention time minimum
+#' @param rt.min.plus amount of minutes to add to the retention time maximum
+#' @keywords retentionTime
+#' @export
+#' @examples 
+#' rt.restrict()
+		
 rt.restrict <- function(IDPdb, rtTable, rt.min.minus, rt.min.plus) {
   
   rr <- numeric()
@@ -1841,10 +1936,14 @@ rt.restrict <- function(IDPdb, rtTable, rt.min.minus, rt.min.plus) {
   return(as.data.frame(rr))
 }
 
-
-######################################################################################
-# function 32. retentionTimeTable
-######################################################################################
+#' A function to make a retention time table
+#'
+#' this function filters gPSMs by retention time
+#' @param dat a data.frame with gPSM data
+#' @keywords table
+#' @export
+#' @examples 
+#' retentionTimeTable()
 
 retentionTimeTable <- function(dat) {
   
@@ -1918,10 +2017,15 @@ retentionTimeTable <- function(dat) {
   
 }
 
+#' A function to make the RQ input table
+#'
+#' this function makes the RQ input table
+#' @param gPSMs.ALL a data.frame with all gPSM data
+#' @keywords import
+#' @export
+#' @examples 
+#' Read.RQinput()
 
-############
-# 33. Read.RQinput Make RQ_input table
-##########
 Read.RQinput <- function (gPSMs.ALL) {
         
         
@@ -1941,10 +2045,15 @@ Read.RQinput <- function (gPSMs.ALL) {
         
 }
 
-########################
-## glycoChange function
-#####
-
+#' A function to change N to n for predicted glycosylation sites
+#'
+#' this function changes N to n for predicted glycosylation sites
+#' @param fasta a character string containing the amino acid sequence of a protein. A fasta file can be imported with the R package 'seqinr'. 
+#' @keywords digest
+#' @export
+#' @examples 
+#' proteinSeq <- "DLQIGFYNQSCPSAESLVQQAVAAAFANNSGIAPGLIRMHFHDCFVRGCDASVLLDSTANNTAEKDAAPNNPSLRGFEVIAAAKSAVEAACPKTVSCADILAFAARDSAALAGNITYQVPSGRRDGNVSLASEALTNIPAPTFNATQLINSFAGKNLTADEMVTLSGAHSIGVSHCFSFLNRIYNFSNTSQVDPTLSSSYADLLRTKCPSNSTRFTPITVSLDIITPTVLDNRYYTGVQLTLGLLTSDQALVTEANLSAAVKNNADNLTAWVAKFAQAIVKMGQIQVLTGTQGEIRTNCSVVNSAS"
+#' glycoChange(fasta=proteinSeq)
 glycoChange <- function(fasta)
 {
         
