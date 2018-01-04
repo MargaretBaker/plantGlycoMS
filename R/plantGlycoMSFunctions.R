@@ -113,7 +113,7 @@ PreferredDeltaMasses <- function (input)
 #'
 #' This function imports IDPicker results and calculates relevant values.
 #' @param IDPdb a data.frame containing peptide spectrum matches
-#' @param ChainSaw a data.frame of insilico digest results (see glycoChainSaw)
+#' @param ChainSaw a data.frame of in silico digest results (see glycoChainSaw)
 #' @param dir a directory containing MS2 binary data
 #' @keywords import data
 #' @export
