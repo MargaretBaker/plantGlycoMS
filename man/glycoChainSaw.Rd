@@ -2,25 +2,26 @@
 % Please edit documentation in R/plantGlycoMSFunctions.R
 \name{glycoChainSaw}
 \alias{glycoChainSaw}
-\title{glycoChainSaw}
+\title{A function to modify a chainsaw in silico digest}
 \usage{
 glycoChainSaw(digest.N, digest.n, carbamidomethylation = TRUE,
   methionineOxidation = TRUE, glycoOnly = TRUE)
 }
 \arguments{
-\item{digest.N}{a chainsaw in silico digest with all glycosylation sites having a capital n (N).}
+\item{digest.N}{a chainsaw in silico digest with all glycosylation sites having a capital n (N)}
 
-\item{digest.n}{a chainsaw in silico digest with all glycosylation sites having a lower case n.}
+\item{digest.n}{a chainsaw in silico digest with all glycosylation sites having a lower case n (n)}
 
-\item{carbamidomethylation}{if TRUE, 57 Da is added to the peptide mass for every cysteine present, default=TRUE}
+\item{carbamidomethylation}{57 Da is added to the peptide mass for every cysteine present, default=TRUE}
 
-\item{methionineOxidation}{if TRUE, 16 Da is added to the peptide mass for every methionine present,and a new row is added to the table so that every methionine containing peptide has a value for oxidized and not oxidized, default=TRUE}
+\item{methionineOxidation}{16 Da is added to the peptide mass for every methionine present, and a new row is added to the table so that every methionine containing peptide has a value for oxidized and not oxidized, default=TRUE}
 
-\item{glycoOnly}{if TRUE, return a dataframe containing only data for peptide with glycosylation sites, default=TRUE}
-}
-\value{
-A data.frame with modified in silico digest results
+\item{glycoOnly}{return a dataframe containing only data for peptide with glycosylation sites, default=TRUE}
 }
 \description{
-This function takes in the results of an in silico digest with chainsaw in tsv format, optionally adds the mass for carbamidomethylation of cysteines (+57) as a fixed modification, optionally adds the mass for oxidation of methionine (+16) as a variable modification, and optionally returns a list of only peptides with a glycosylation site.
+this function adds the mass for carbamidomethylation and methionine oxidation and filters for glycopeptides
 }
+\examples{
+glycoChainSaw()
+}
+\keyword{digest}
