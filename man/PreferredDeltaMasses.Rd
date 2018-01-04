@@ -2,16 +2,15 @@
 % Please edit documentation in R/plantGlycoMSFunctions.R
 \name{PreferredDeltaMasses}
 \alias{PreferredDeltaMasses}
-\title{PreferredDeltaMasses}
+\title{A function to add the glycosylation motif for a MyriMatch database search config}
 \usage{
 PreferredDeltaMasses(input)
 }
 \arguments{
-\item{input}{A vector of glycan masses (from the pGlycoFilter function)}
-}
-\value{
-A vector of glycan masses with "N!{P}[ST] * " pasted in front of the glycan masses
+\item{input}{a vector of dynamic modification masses}
 }
 \description{
-this function is used to make a vector of glycan masses with "N!{P}[ST] * " pasted in front of the glycan masses which can be pasted into a MyriMatch configuration file.
+this function adds N!{P}[ST] * in front of a mass value
 }
+\keyword{data}
+\keyword{import}

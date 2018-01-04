@@ -2,16 +2,17 @@
 % Please edit documentation in R/plantGlycoMSFunctions.R
 \name{spectrumTable}
 \alias{spectrumTable}
-\title{spectrumTable}
+\title{A function to calculate monoisotopic precursor mass}
 \usage{
 spectrumTable(input)
 }
 \arguments{
-\item{input}{The name of the csv file containing precursor m/z values.  For the MiMB workflow, use the precursor m/z column of the spectrum table obtained from an msaccess search (proteowizard).}
-}
-\value{
-This function returns a data.frame including the input and additionally the monoisotopic precursor masses.
+\item{input}{a csv file with one column named precursorMZ}
 }
 \description{
-This function calculates the monoisotopic precursor mass from the precursor mz.
+this function calculates the monoisotopic precursor mass from then precursor mz
 }
+\examples{
+spectrumTable()
+}
+\keyword{calculate}
