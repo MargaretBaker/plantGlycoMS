@@ -8,4 +8,4 @@ Authors: Margaret Baker, Travers Ching
 1. On Windows, install Rtools (https://cran.r-project.org/bin/windows/Rtools/)
 2. In R, install devtools: `install.packages("devtools")`
 3. `library(devtools)`
-4. `install_github("traversc/plantGlycoMS")`
+4. `install_github("MargaretBaker/plantGlycoMS")`
