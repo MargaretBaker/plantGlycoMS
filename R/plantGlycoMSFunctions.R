@@ -332,6 +332,229 @@ Read.IDPdb <- function (IDPdb, ChainSaw,dir) {
         
 }
 
+#' A function to import IDPicker results from maxis data
+#'
+#' This function imports IDPicker results and calculates relevant values.
+#' @param IDPdb a data.frame containing peptide spectrum matches
+#' @param ChainSaw a data.frame of insilico digest results (see glycoChainSaw)
+#' @param dir a directory containing MS2 binary data
+#' @keywords import data
+#' @export
+#' @examples
+#' Read.IDPdb.maxis()
+
+Read.IDPdb.maxis <- function (IDPdb, ChainSaw,dir) {
+        
+
+        IDPdb <- IDPdb[, -c(2:6)]
+       IDPdb <- IDPdb[-c(1,2),]
+       
+      # x <-  data.frame (IDPdb$Group.Source.Spectrum, IDPdb$Sequence)
+     #  IDPdb <- IDPdb[!duplicated(x),]
+        
+        ppm.mass.error <- IDPdb$Mass.Error/IDPdb$Exact.Mass *10^6
+        IDPdb$ppm.mass.error <- ppm.mass.error     
+        
+        exact.precursor.mz <- (IDPdb$Exact.Mass+(1.00727647*IDPdb$Charge))/IDPdb$Charge
+        IDPdb$exact.precursor.mz <- exact.precursor.mz
+        
+        
+        # change: factor 0.1.4586  to: numeric 4586 
+        sc <- IDPdb$Group.Source.Spectrum
+        #sc <- strsplit(sc, split=".", fixed=T)
+        #scans <- sapply(sc, function(x) x[3])
+        scans <- as.numeric(sc)
+        IDPdb$Group.Source.Spectrum <- scans
+        
+        # Make a data frame 'MS2.all' with columns 'title' and 'scans'; 
+        # it contains this info for all MS2 binary files
+        
+        title <- list.files(dir)
+        
+        #chr "MS2Data.mzML.binary.sn1830.txt" to: num  1830
+        sc <- strsplit(title, split="binary.")
+        scans <- sapply(sc, function(x) x[2])
+        scans <- gsub(pattern=".txt", replacement="", x=scans)
+        Group.Source.Spectrum <- as.numeric(scans)
+        
+        # itle and scan number. data will be filled in after merging with IDPdb
+        MS2.all <- data.frame(Group.Source.Spectrum, title) 
+        IDPdb <- merge(  x = MS2.all,y = IDPdb,  by = "Group.Source.Spectrum", all.y = TRUE)
+        IDPdb$title <- as.character(IDPdb$title)        
+        
+        
+        #Modify the column contents of IDPdb
+        
+        # change: chr "QHGFTMM[16]NVYN[1170]STK" to: chr "QHGFTMMNVYNSTK"
+        peptideSequence <- IDPdb$Sequence        
+        peptideSequence <- gsub(pattern="[0123456789]", replacement="", peptideSequence)
+        peptideSequence <- gsub(pattern="[]", replacement="", peptideSequence,fixed = TRUE)
+     
+        IDPdb$peptideSequence <- peptideSequence
+        
+        # change: chr "QHGFTMM[16]NVYN[1170]STK" to: chr "QHGFTMM16NVYNSTK"
+        table2Sequence <- IDPdb$Sequence        
+        table2Sequence <- gsub( "C[57]", "C", table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub( "M[16]", "$",  table2Sequence ,fixed=TRUE)
+        
+        table2Sequence <- gsub( "K[57]", "@",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub( "H[57]", "#",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub( "D[57]", "%",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub( "E[57]", "^",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub( "S[57]", "&",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub( "T[57]", "*",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub( "Y[57]", "(",  table2Sequence ,fixed=TRUE)
+        
+        
+        table2Sequence <- gsub(pattern="[0123456789]", replacement="", table2Sequence)
+        table2Sequence <- gsub(pattern="[]", replacement="", table2Sequence, 
+                               fixed = TRUE)
+        
+        table2Sequence <- gsub(  "$", "M16",  table2Sequence ,fixed=TRUE)
+        
+        table2Sequence <- gsub(  "@", "K57",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub(  "#", "H57",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub(  "%", "D57",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub(  "^", "E57",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub(  "&", "S57",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub(  "*", "T57",  table2Sequence ,fixed=TRUE)
+        table2Sequence <- gsub(  "(", "Y57",  table2Sequence ,fixed=TRUE)
+        
+        IDPdb$table2Sequence <- table2Sequence
+       
+        # change: chr "QHGFTMM[16]NVYN[1170]STK" to: chr "0000000200010000"
+        modification <- IDPdb$Sequence
+        modification<- gsub(pattern="[0123456789]", replacement="0", 
+                            modification, fixed=FALSE)
+        modification <- gsub( "C[00]", "C", modification ,fixed=TRUE)
+        modification <- gsub( "M[00]", "2",  modification ,fixed=TRUE)
+        
+        modification <- gsub( "K[00]", "3",  modification ,fixed=TRUE)
+        modification <- gsub( "H[00]", "4",  modification ,fixed=TRUE)
+        modification <- gsub( "D[00]", "5",  modification ,fixed=TRUE)
+        modification <- gsub( "E[00]", "6",  modification ,fixed=TRUE)
+        modification <- gsub( "S[00]", "7",  modification ,fixed=TRUE)
+        modification <- gsub( "T[00]", "8",  modification ,fixed=TRUE)
+        modification <- gsub( "Y[00]", "9",  modification ,fixed=TRUE)
+        
+        modification<- gsub( "N[000]", "1",  modification,fixed=TRUE)
+        modification<- gsub( "N[0000]", "1",  modification,fixed=TRUE)
+        modification <- gsub( "[A-Z]", "0", modification)
+        modification[1:length(modification)] <- paste("0", 
+                                                      modification[1:length(modification)], "0", sep="")
+        IDPdb$modification <- modification
+        
+        IDPdb$charge <- as.numeric(IDPdb$Charge)
+        
+        names(ChainSaw) <- c("peptideSequence", "protein", "mass", "missedCleavages","specificity",        
+                             "nTerminusIsSpecific", "cTerminusIsSpecific", "n.sequence") 
+        
+        IDPdb <- merge( x = ChainSaw, y = IDPdb, by = "peptideSequence" )
+        
+        # make the GlycanMass column for IDPdb data frame 
+        # change: chr "Q[-17]HGFTMM[16]NVYN[1170]STK"
+        #     to: num 1170
+        
+        GlycanMass <- IDPdb$Sequence
+        GlycanMass <- gsub( "C[57]", "C", GlycanMass ,fixed=TRUE)
+        
+        GlycanMass <- gsub( "M[16]", "M",  GlycanMass ,fixed=TRUE)
+        
+        GlycanMass <- gsub( "K[57]", "K",  GlycanMass ,fixed=TRUE)
+        GlycanMass <- gsub( "H[57]", "H",  GlycanMass ,fixed=TRUE)
+        GlycanMass <- gsub( "D[57]", "D",  GlycanMass ,fixed=TRUE)
+        GlycanMass <- gsub( "E[57]", "E",  GlycanMass ,fixed=TRUE)
+        GlycanMass <- gsub( "S[57]", "S",  GlycanMass ,fixed=TRUE)
+        GlycanMass <- gsub( "T[57]", "T",  GlycanMass ,fixed=TRUE)
+        GlycanMass <- gsub( "Y[57]", "Y",  GlycanMass ,fixed=TRUE)
+        
+        
+        GlycanMass <- gsub( "[A-Z]", "", GlycanMass)
+        
+        GlycanMass <- strsplit(GlycanMass , split="][", fixed=TRUE)
+        GlycanMass <- lapply(GlycanMass, function(x){
+                gsub("[", "", x, fixed=TRUE)})
+        GlycanMass <- lapply(GlycanMass, function(x){
+                gsub("]", "", x, fixed=TRUE)})
+        GlycanMass <- lapply(GlycanMass, function(x){
+                as.numeric(x)})
+        GlycanMass <- lapply(GlycanMass, function(x){
+                sum(x)})
+        GlycanMass <- unlist(GlycanMass)
+        
+        IDPdb$GlycanMass <- GlycanMass
+        
+        # Calculate Y1 values
+        
+        # make modMass column for IDPdb data.frame; use to calculate MonoisotopicY1mass
+        # change: chr "QHGFTMM[16]NVYN[1170]STK"
+        #     to: num [1:14] 0 0 0 0 0 0 16 0 0 0 203 0 0 0
+        #     to: num 219
+        
+        modMass <- IDPdb$Sequence
+        modMass <- gsub( "C[57]", "C", modMass ,fixed=TRUE)
+        modMass <- gsub( "M[16]", "m",  modMass ,fixed=TRUE)
+        modMass <- gsub( "K[57]", "k",  modMass ,fixed=TRUE)
+        modMass <- gsub( "H[57]", "h",  modMass ,fixed=TRUE)
+        modMass <- gsub( "D[57]", "d",  modMass ,fixed=TRUE)
+        modMass <- gsub( "E[57]", "e",  modMass ,fixed=TRUE)
+        modMass <- gsub( "S[57]", "s",  modMass ,fixed=TRUE)
+        modMass <- gsub( "T[57]", "t",  modMass ,fixed=TRUE)
+        modMass <- gsub( "Y[57]", "y",  modMass ,fixed=TRUE)
+        modMass <- gsub(pattern="[0123456789]", replacement="0", modMass )
+        modMass <- gsub( "N[000]", "n",  modMass ,fixed=TRUE)
+        modMass <- gsub( "N[0000]", "n",  modMass ,fixed=TRUE)
+        modMass <- gsub( "[A-Z]", "0", modMass)
+        modMass <- strsplit(modMass , split="")
+        modMass <- lapply(modMass, function(x){gsub("m", "15.994915", x)})
+        modMass <- lapply(modMass, function(x){gsub("k", "57.021464", x)})
+        modMass <- lapply(modMass, function(x){gsub("h", "57.021464", x)})
+        modMass <- lapply(modMass, function(x){gsub("d", "57.021464", x)})
+        modMass <- lapply(modMass, function(x){gsub("e", "57.021464", x)})
+        modMass <- lapply(modMass, function(x){gsub("s", "57.021464", x)})
+        modMass <- lapply(modMass, function(x){gsub("t", "57.021464", x)})
+        modMass <- lapply(modMass, function(x){gsub("y", "57.021464", x)})
+        modMass <- lapply(modMass, function(x){gsub("n", "0", x)})
+        modMass <- lapply(modMass, function(x){as.numeric(x)})
+        modMass <- sapply(modMass, function(x) {sum(x)})
+        IDPdb$modMass <- modMass
+        IDPdb$MonoisotopicPeptideMass <- mapply(sum, IDPdb$modMass , IDPdb$mass)
+        
+        glycoModMass <- IDPdb$Sequence
+        glycoModMass <- gsub( "C[57]", "0", glycoModMass ,fixed=TRUE)
+        glycoModMass <- gsub( "M[16]", "0",  glycoModMass ,fixed=TRUE)
+        glycoModMass <- gsub( "K[57]", "0",  glycoModMass ,fixed=TRUE)
+        glycoModMass <- gsub( "H[57]", "0",  glycoModMass ,fixed=TRUE)
+        glycoModMass <- gsub( "D[57]", "0",  glycoModMass ,fixed=TRUE)
+        glycoModMass <- gsub( "E[57]", "0",  glycoModMass ,fixed=TRUE)
+        glycoModMass <- gsub( "S[57]", "0",  glycoModMass ,fixed=TRUE)
+        glycoModMass <- gsub( "T[57]", "0",  glycoModMass ,fixed=TRUE)
+        glycoModMass <- gsub( "Y[57]", "0",  glycoModMass ,fixed=TRUE)
+        glycoModMass <- gsub(pattern="[0123456789]", replacement="0", 
+                             glycoModMass )
+        glycoModMass <- gsub( "N[000]", "n",  glycoModMass ,fixed=TRUE)
+        glycoModMass <- gsub( "N[0000]", "n",  glycoModMass ,fixed=TRUE)
+        glycoModMass <- gsub( "[A-Z]", "0", glycoModMass)
+        glycoModMass <- strsplit(glycoModMass , split="")
+        glycoModMass <- lapply(glycoModMass,function(x){gsub("n" , "203.079373", x, 
+                                                             fixed=TRUE)})
+        glycoModMass <- lapply(glycoModMass, function(x){as.numeric(x)})
+        glycoModMass <- sapply(glycoModMass, function(x) {sum(x)})
+        is.na(glycoModMass) <- glycoModMass ==0
+        IDPdb$glycoModMass <- glycoModMass 
+        IDPdb$MonoisotopicY1mass <- mapply(sum, IDPdb$glycoModMass , IDPdb$MonoisotopicPeptideMass)
+        
+        MonoisotopicY1mass <- IDPdb$MonoisotopicY1mass
+        MonoisotopicY1mass[is.na(MonoisotopicY1mass)] <- 0
+        IDPdb$MonoisotopicY1mass <- MonoisotopicY1mass
+        
+    
+        
+        
+        return(IDPdb) 
+        
+}
+
 #' A function to import MS2 binary data generated with msaccess (ProteoWizard).
 #'
 #' this function imports MS2 binary data
