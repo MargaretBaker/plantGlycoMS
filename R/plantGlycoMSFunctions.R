@@ -2063,6 +2063,194 @@ Read.GlycoMod <- function (input,
         
 }
 
+#' A function to import GlycoMod data from maxis results
+#'
+#' this function is for importing GlycoMod data
+#' @param input glycopeptide identifications from GlycoMod
+#' @param ChainSaw an in silico digest
+#' @param spectrum.table a summary table of MS data
+#' @param dir a directory with MS2 binary data
+#' @keywords import
+#' @export
+#' @examples 
+#' Read.GlycoMod.maxis()
+
+Read.GlycoMod.maxis <- function (input, 
+                           ChainSaw,
+                           spectrum.table=spectrum.table, 
+                           dir="MS2Data") {
+        
+        spectrum.table <- read.csv(spectrum.table, skip=1)
+        
+        names(input) <- c("glycoform.mass", "mass.error.ppm", "structure", "type", 
+                           "peptide.mass",
+                           "sequence", "Exact.Mass", "mod", "links" )
+        
+        
+        input$Exact.Mass <- as.numeric(input$Exact.Mass)
+        input$mass.error.ppm <- as.numeric(input$mass.error.ppm)
+        
+        input$Observed.Mass <- input$Exact.Mass + (input$mass.error.ppm/ 1e+06*input$Exact.Mass)
+        input$round.Observed.Mass <- round(input$Observed.Mass, digits=0)
+        input$round.Observed.Mass.minus1 <- (input$round.Observed.Mass-1)
+        input$round.Observed.Mass.plus1 <- (input$round.Observed.Mass+1)
+        spectrum.table$Observed.Mass <- ((spectrum.table$precursorMZ *spectrum.table$charge)-
+                                            (spectrum.table$charge * 1.007276))
+        spectrum.table$round.Observed.Mass <- round(spectrum.table$Observed.Mass, digits=0)
+        
+        
+        input_round <- merge (x=input, y=spectrum.table, by="round.Observed.Mass", all.x=TRUE)
+        
+        
+        input_round_minus <- merge (x=input, y=spectrum.table, 
+                                     by.x="round.Observed.Mass.minus1", by.y="round.Observed.Mass",
+                                     all.x=TRUE)
+        
+        input_round_plus <- merge (x=input, y=spectrum.table, 
+                                    by.x="round.Observed.Mass.plus1", by.y="round.Observed.Mass",
+                                    all.x=TRUE)
+        
+        
+        glycoModIDs <- rbind (input_round, input_round_minus, input_round_plus)
+        
+        glycoModIDs$analysis <- "GlycoMod"
+        glycoModIDs$Q.Value <- 0
+        glycoModIDs$mass.error <- glycoModIDs$Exact.Mass - glycoModIDs$Observed.Mass.y
+        glycoModIDs$Scan.Time <- glycoModIDs$rt/60
+        
+        
+        IDPdb <- glycoModIDs
+        
+        IDPdb <- IDPdb[c("id", "Scan.Time", "Observed.Mass.y", "precursorMZ",
+                         "Exact.Mass", "mass.error","analysis", "charge", "Q.Value", 
+                         "sequence",
+                         "glycoform.mass", "peptide.mass", "structure")]
+        
+        names(IDPdb) <- c("scans", "Scan.Time", "Observed.Mass","precursorMZ", "Exact.Mass", 
+                          "mass.error", 
+                          "analysis", "charge", "Q.Value", "sequence", "glycoform.mass", 
+                          "peptide.mass", "structure")        
+        
+        
+        exact.precursor.mz <- (IDPdb$Exact.Mass+(1.00727647*IDPdb$charge))/IDPdb$charge
+        IDPdb$exact.precursor.mz <- exact.precursor.mz
+        
+        # make a ppm.mass.error column
+        #IDPdb$mass.error/IDPdb$Exact.Mass *10^6
+        
+        ppm.mass.error <- (IDPdb$mass.error/IDPdb$Exact.Mass *10^6)
+        IDPdb$ppm.mass.error <- ppm.mass.error
+        IDPdb <- subset(IDPdb, IDPdb$ppm.mass.error <= 15 & IDPdb$ppm.mass.error >= -15)
+        
+        # change: factor 0.1.4586  to: numeric 4586
+        sc <- IDPdb$scans
+        #sc <- as.character(sc)
+        #sc <- strsplit(sc, split=".", fixed=T)
+        #scans <- sapply(sc, function(x) x[3])
+        scans <- as.numeric(sc)
+        IDPdb$scans <- scans
+        
+        # Make a data frame 'MS2.all' with columns 'title' and 'scans'; 
+        # it contains this info for all MS2 binary files
+        
+        title <- list.files(dir)
+        
+        # change: chr "ljz_20131022_MR_Chym1_HILIC_MS2.mzML.binary.sn1830.txt" 
+        #to: num  10011
+        
+        sc <- strsplit(title, split="binary.")
+        scans <- sapply(sc, function(x) x[2])
+        scans <- gsub(pattern=".txt", replacement="", x=scans)
+        scans <- as.numeric(scans)
+        
+        #  title and scan number. data will be filled in after merging with IDPdb
+        MS2.all <- data.frame(scans, title) 
+        IDPdb <- merge(  x = MS2.all,y = IDPdb,  by = "scans", all.y = TRUE)
+        IDPdb$title <- as.character(IDPdb$title)        
+        
+        
+        ###add methionine oxidation as a variable modification
+        M <- ChainSaw[grep("M", ChainSaw$sequence), ]
+        mox <- gsub( "M", "m", M$sequence ,fixed=TRUE)
+        mox <- gsub( "[A-Z]", "0", mox)
+        mox <- strsplit(mox , split="")
+        mox <- lapply(mox , function(x){gsub("m", "15.994915", x)})
+        mox <- lapply(mox , function(x){as.numeric(x)})
+        mox <- sapply(mox , function(x) {sum(x)})      
+        M$mass <- mapply(sum, M$mass , mox)
+        
+        # change: chr "QHGFTMMNVYNSTK" to: chr "QHGFTMM16NVYNSTK"
+        moxSeq <- M$sequence  
+        moxSeq <- as.character(moxSeq)
+        moxSeq <- gsub( "M", "M16",  moxSeq ,fixed=TRUE)
+        M$sequence <- moxSeq
+        
+        ChainSaw <- rbind(ChainSaw, M)
+        
+        
+        ChainSaw$peptide.mass <- round(ChainSaw$mass, 3)
+        
+        
+        IDPdb <- merge( x = ChainSaw, y = IDPdb, by = "peptide.mass" )
+        
+        #Modify the column contents of IDPdb
+        
+        
+        # change: chr "QHGFTMM[16]NVYN[1170]STK" to: chr "0000000200010000"
+        modification <- IDPdb$sequence.x
+        modification <- gsub( "M16", "2",  modification,fixed=TRUE)
+        modification<- gsub( "N[ABCDEFGHIJKLMNOQRSTUVWXYZ]T", "100", modification)
+        modification<- gsub( "N[ABCDEFGHIJKLMNOQRSTUVWXYZ]S", "100",modification)
+        #modification<- gsub( "NF", "10",  modification,fixed=TRUE)
+        modification <- gsub( "[A-Z]", "0",modification)
+        modification[1:length(modification)] <- 
+                paste("0",modification[1:length(modification)],"0", sep="")
+        IDPdb$modification <- modification
+        
+        IDPdb$charge <- as.numeric(IDPdb$charge)
+        
+        peptideSequence <- IDPdb$sequence.x
+        peptideSequence <- gsub("M16", "M", peptideSequence)
+
+        IDPdb$peptideSequence <- peptideSequence
+        
+        IDPdb$table2Sequence <- IDPdb$sequence.x
+        
+        # change: chr "Q[-17]HGFTMM[16]NVYN[1170]STK" to: num 1170
+        
+        gg <- IDPdb$glycoform.mass
+        gg <- as.character(gg)
+        gg <- strsplit(gg, split=".", fixed=T)
+        GlycanMass <- sapply(gg, function(x) x[1])  
+        
+        IDPdb$GlycanMass <- as.numeric(GlycanMass)
+        
+        # Calculate Y1 values
+        
+        modMass <- IDPdb$sequence
+        
+        IDPdb$MonoisotopicY1mass <- mapply(sum, 203.079373 , IDPdb$mass)
+        
+        MonoisotopicY1mass <- IDPdb$MonoisotopicY1mass
+        MonoisotopicY1mass[is.na(MonoisotopicY1mass)] <- 0
+        IDPdb$MonoisotopicY1mass <- MonoisotopicY1mass
+        
+        IDPdb$MonoisotopicPeptideMass <- IDPdb$mass
+        
+        IDPdb <- IDPdb[!duplicated(IDPdb),]
+        
+        IDPdb$Group.Source.Spectrum <- IDPdb$scans
+        IDPdb$Sequence <- IDPdb$sequence.x
+        IDPdb$Precursor.m.z <- IDPdb$precursorMZ
+        
+        oo <- order(IDPdb$scans)
+        IDPdb <- IDPdb[oo,]
+        
+        
+        return(IDPdb) 
+        
+}
+
 #' A function to match peptides to spectra
 #'
 #' this function plots MS data
