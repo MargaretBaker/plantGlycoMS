@@ -2,7 +2,9 @@
 
 export(PreferredDeltaMasses)
 export(Read.GlycoMod)
+export(Read.GlycoMod.maxis)
 export(Read.IDPdb)
+export(Read.IDPdb.maxis)
 export(Read.MS2Data)
 export(Read.RQ)
 export(Read.RQinput)
